@@ -1,0 +1,44 @@
+{
+  "items": [],
+  "categories": [
+    {
+      "name": "Alimentos",
+      "subcats": [
+        "Despensa"
+      ]
+    },
+    {
+      "name": "Limpeza",
+      "subcats": []
+    }
+  ],
+  "tags": [
+    "Perecível",
+    "Urgente",
+    "Pesado",
+    "Uso Diário"
+  ],
+  "compendium": [
+    "Arroz",
+    "Feijão",
+    "Detergente"
+  ],
+  "logs": [],
+  "settings": {
+    "useFolders": false,
+    "showExpiry": false,
+    "showEstablishment": false,
+    "showPrice": false,
+    "enableQuickFilters": true,
+    "enableCatFilters": true,
+    "colOrder": [
+      "name",
+      "qty",
+      "cat",
+      "expiry",
+      "establishment",
+      "price",
+      "actions"
+    ]
+  }
+}
