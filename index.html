@@ -118,9 +118,28 @@
             <button id="btnToggleFilters" onclick="toggleFilters()" class="text-xs text-gray-500 hover:text-primary text-left font-medium mt-1 w-max"><i class="fa-solid fa-filter mr-1"></i> Exibir/Ocultar Filtros Rápidos</button>
         </div>
 
-        <!-- Filtros Rápidos -->
-        <div class="mb-4 flex gap-2 overflow-x-auto pb-2 hidden items-center" id="quickTagsFilter">
-            <!-- Renderizado via JS -->
+        <!-- Filtros Rápidos (Categorias, Tags, Locais e Preços) -->
+        <div id="filtersWrapper" class="mb-4 hidden flex-col sm:flex-row gap-2 items-start sm:items-center">
+            
+            <!-- Filtro Avançado de Preço -->
+            <div id="priceFilterContainer" class="hidden flex items-center gap-1 border border-gray-200 dark:border-gray-700 p-1 rounded-lg bg-white dark:bg-darkcard shadow-sm w-full sm:w-auto">
+                <span class="text-[10px] text-gray-500 uppercase font-bold px-1"><i class="fa-solid fa-dollar-sign"></i> Preço</span>
+                <select id="priceOp" onchange="renderItems()" class="text-xs p-1 rounded bg-gray-50 border dark:bg-gray-800 dark:border-gray-600 text-gray-700 dark:text-gray-300 outline-none focus:ring-1 focus:ring-primary">
+                    <option value="">-</option>
+                    <option value=">">Maior ></option>
+                    <option value="<">Menor <</option>
+                    <option value=">=">Maior/Igual >=</option>
+                    <option value="<=">Menor/Igual <=</option>
+                    <option value="==">Igual =</option>
+                    <option value="!=">Diferente !=</option>
+                </select>
+                <input type="number" step="0.01" id="priceVal" oninput="renderItems()" placeholder="Valor" class="text-xs p-1 w-20 rounded bg-gray-50 border dark:bg-gray-800 dark:border-gray-600 text-gray-700 dark:text-gray-300 outline-none focus:ring-1 focus:ring-primary">
+            </div>
+
+            <!-- Botões Dinâmicos (Tags, Cats, Estabelecimentos) -->
+            <div class="flex gap-2 overflow-x-auto pb-1 items-center flex-grow w-full" id="quickTagsFilter">
+                <!-- Renderizado via JS -->
+            </div>
         </div>
 
         <!-- Tabela -->
@@ -225,7 +244,7 @@
                 
                 <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border dark:border-gray-700">
                     <h3 class="font-semibold mb-2 text-sm uppercase text-gray-500">Filtros Rápidos</h3>
-                    <label class="flex items-center gap-2 cursor-pointer mb-2"><input type="checkbox" id="setEnableQuickFilters" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Habilitar botão de Filtros Rápidos</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer mb-2"><input type="checkbox" id="setEnableQuickFilters" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Habilitar barra de Filtros Rápidos</span></label>
                     <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="setEnableCatFilters" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Incluir <span class="lbl-cat">Categorias</span> na barra de Filtros</span></label>
                 </div>
 
@@ -271,7 +290,7 @@
         </div>
     </div>
 
-    <!-- Modais Genéricos Simples (Agora com Lápis de Edição) -->
+    <!-- Modais Genéricos Simples -->
     <div id="tagsModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 animate-fade"><div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-sm"><h2 class="text-xl font-bold mb-4">Gerenciar Tags</h2><div class="flex gap-2 mb-4"><input type="text" id="newTagName" class="w-full p-2 border rounded-lg text-sm dark:bg-gray-800 focus:ring-primary outline-none"><button onclick="addTag()" class="bg-primary text-white px-3 py-2 rounded-lg"><i class="fa-solid fa-plus"></i></button></div><div id="tagsList" class="max-h-60 overflow-y-auto space-y-2"></div><div class="flex justify-end mt-4"><button onclick="closeModal('tagsModal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-bold">Fechar</button></div></div></div>
     <div id="compendiumModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 animate-fade"><div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-sm"><h2 class="text-xl font-bold mb-4">Dicionário</h2><div class="flex gap-2 mb-4"><input type="text" id="newCompName" class="w-full p-2 border rounded-lg text-sm dark:bg-gray-800 focus:ring-primary outline-none"><button onclick="addCompendium()" class="bg-primary text-white px-3 py-2 rounded-lg"><i class="fa-solid fa-plus"></i></button></div><div id="compendiumListUI" class="max-h-60 overflow-y-auto space-y-2"></div><div class="flex justify-end mt-4"><button onclick="closeModal('compendiumModal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-bold">Fechar</button></div></div></div>
     <div id="categoryModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 animate-fade"><div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-md"><h2 class="text-xl font-bold mb-4">Categorias</h2><div class="flex gap-2 mb-4"><input type="text" id="newCatName" class="w-full p-2 border rounded-lg text-sm dark:bg-gray-800 focus:ring-primary outline-none"><button onclick="addCategory()" class="bg-primary text-white px-3 py-2 rounded-lg"><i class="fa-solid fa-plus"></i></button></div><div id="categoriesList" class="max-h-60 overflow-y-auto space-y-2 p-2"></div><div class="flex justify-end mt-4"><button onclick="closeModal('categoryModal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-bold">Fechar</button></div></div></div>
@@ -297,26 +316,42 @@
         };
 
         let currentUser = ""; let sortCol = "name"; let sortAsc = true;
-        let activeTagFilters = []; let activeCatFilters = []; let activeSubcatFilters = [];
+        let activeTagFilters = []; let activeCatFilters = []; let activeSubcatFilters = []; let activeEstFilters = [];
         let isReadOnly = false; let draggedCol = null;
 
-        window.onload = () => {
+        window.onload = async () => {
             currentUser = localStorage.getItem("inv_user");
+            
+            // Auto-Load Fallback (Puxar dados.json publicamente se existir, para usuários sem token)
+            try {
+                const res = await fetch('./dados.json?t=' + new Date().getTime());
+                if(res.ok) {
+                    const pubData = await res.json();
+                    if(!appData.settings.ghToken) { // Só mescla se não for usar a API logo em seguida
+                        appData = { ...appData, ...pubData };
+                    }
+                }
+            } catch(e) {}
+
             const localData = localStorage.getItem("inv_data");
-            if (localData) {
+            if (localData && (!appData.items || appData.items.length === 0)) {
                 try {
                     const parsed = JSON.parse(localData); appData = { ...appData, ...parsed }; 
-                    if(!appData.settings.colOrder) appData.settings.colOrder = ['name', 'qty', 'cat', 'expiry', 'establishment', 'price', 'actions'];
-                    if(appData.settings.enableQuickFilters === undefined) appData.settings.enableQuickFilters = true;
-                    if(appData.settings.enableCatFilters === undefined) appData.settings.enableCatFilters = true;
                 } catch(e) {}
             }
+            
+            // Garantias de estrutura
+            if(!appData.settings.colOrder) appData.settings.colOrder = ['name', 'qty', 'cat', 'expiry', 'establishment', 'price', 'actions'];
+            if(appData.settings.enableQuickFilters === undefined) appData.settings.enableQuickFilters = true;
+            if(appData.settings.enableCatFilters === undefined) appData.settings.enableCatFilters = true;
+
             if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
             updateThemeIcon();
             if (currentUser) { iniciarInterfacePrincipal(); } else { document.getElementById('loginScreen').classList.replace('hidden', 'flex'); }
         };
 
         function login() { const inp = document.getElementById('loginName'); if(!inp.value.trim()) return; inp.blur(); currentUser = inp.value.trim(); localStorage.setItem("inv_user", currentUser); iniciarInterfacePrincipal(); }
+        
         function iniciarInterfacePrincipal() {
             document.getElementById('loginScreen').classList.replace('flex', 'hidden');
             document.getElementById('mainHeader').classList.remove('hidden'); document.getElementById('mainContent').classList.remove('hidden');
@@ -339,7 +374,7 @@
         function toggleDropdown(id) { const menu = document.getElementById(id); if(menu.classList.contains('hidden')) { document.querySelectorAll('.absolute.z-20, .absolute.z-50').forEach(m => m.classList.add('hidden')); menu.classList.remove('hidden'); } else { menu.classList.add('hidden'); } }
         document.addEventListener('click', (e) => { if(!e.target.closest('.relative')) document.querySelectorAll('.absolute.z-20, .absolute.z-50').forEach(m => m.classList.add('hidden')); });
 
-        function toggleFilters() { document.getElementById('quickTagsFilter').classList.toggle('hidden'); }
+        function toggleFilters() { document.getElementById('filtersWrapper').classList.toggle('hidden'); document.getElementById('filtersWrapper').classList.toggle('flex'); }
         function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
         function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
 
@@ -348,8 +383,17 @@
 
         // ================= GERENCIADORES (Filtros, Dicionario, Cats) =================
         function renderQuickFilters() {
+            const wrap = document.getElementById('filtersWrapper');
             const q = document.getElementById('quickTagsFilter'); q.innerHTML = "";
-            if(!appData.settings.enableQuickFilters) { q.classList.add('hidden'); document.getElementById('btnToggleFilters').classList.add('hidden'); return; } else { document.getElementById('btnToggleFilters').classList.remove('hidden'); }
+            const pf = document.getElementById('priceFilterContainer');
+            
+            if(!appData.settings.enableQuickFilters) { 
+                wrap.classList.remove('flex'); wrap.classList.add('hidden'); 
+                document.getElementById('btnToggleFilters').classList.add('hidden'); return; 
+            } else { document.getElementById('btnToggleFilters').classList.remove('hidden'); }
+
+            if(appData.settings.showPrice) pf.classList.replace('hidden', 'flex'); else pf.classList.replace('flex', 'hidden');
+
             if(appData.settings.enableCatFilters) {
                 appData.categories.forEach(c => {
                     const act = activeCatFilters.includes(c.name);
@@ -365,6 +409,16 @@
                 const act = activeTagFilters.includes(t);
                 q.innerHTML += `<button onclick="toggleTagFilter('${t}')" class="px-3 py-1 rounded-full text-xs font-medium border transition whitespace-nowrap ${act ? 'bg-primary text-white border-primary shadow-inner' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100'}">${t}</button>`;
             });
+
+            // Extrair e renderizar Estabelecimentos dinâmicos
+            const locs = [...new Set(appData.items.map(i => i.establishment).filter(e => e && e.trim() !== ''))];
+            if(locs.length > 0 && appData.settings.showEstablishment) {
+                q.innerHTML += `<div class="h-6 border-l border-gray-300 dark:border-gray-600 mx-1"></div>`;
+                locs.forEach(loc => {
+                    const act = activeEstFilters.includes(loc);
+                    q.innerHTML += `<button onclick="toggleEstFilter('${loc}')" class="px-3 py-1 rounded-full text-xs font-medium border transition whitespace-nowrap ${act ? 'bg-purple-500 text-white border-purple-500 shadow-inner' : 'bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800 hover:bg-purple-50'}"><i class="fa-solid fa-location-dot mr-1"></i>${loc}</button>`;
+                });
+            }
         }
 
         function getModalSelectedTags() { return Array.from(document.querySelectorAll('.item-tag-cb:checked')).map(c=>c.value); }
@@ -406,6 +460,7 @@
         function toggleTagFilter(t) { activeTagFilters.includes(t) ? activeTagFilters=activeTagFilters.filter(x=>x!==t) : activeTagFilters.push(t); renderQuickFilters(); renderItems(); }
         function toggleCatFilter(c) { activeCatFilters.includes(c) ? activeCatFilters=activeCatFilters.filter(x=>x!==c) : activeCatFilters.push(c); renderQuickFilters(); renderItems(); }
         function toggleSubcatFilter(s) { activeSubcatFilters.includes(s) ? activeSubcatFilters=activeSubcatFilters.filter(x=>x!==s) : activeSubcatFilters.push(s); renderQuickFilters(); renderItems(); }
+        function toggleEstFilter(e) { activeEstFilters.includes(e) ? activeEstFilters=activeEstFilters.filter(x=>x!==e) : activeEstFilters.push(e); renderQuickFilters(); renderItems(); }
         
         function renderCompendium() { const dl=document.getElementById('compendiumList'); const lt=document.getElementById('compendiumListUI'); dl.innerHTML=""; lt.innerHTML=""; appData.compendium.forEach((c,i)=>{ dl.innerHTML+=`<option value="${c}">`; lt.innerHTML+=`<div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded mb-1 text-sm font-medium"><span>${c}</span><div><button onclick="editCompendium(${i})" class="text-blue-500 mr-3"><i class="fa-solid fa-pen text-xs"></i></button><button onclick="removeCompendium(${i})" class="text-red-500"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`; }); }
         function addCompendium() { const v=document.getElementById('newCompName').value.trim(); if(v && !appData.compendium.includes(v)){appData.compendium.push(v); document.getElementById('newCompName').value=""; renderCompendium(); saveData();} }
@@ -478,13 +533,33 @@
         function getStatusColor(q, r, o) { if(!q) return "text-gray-500"; const n=parseFloat(q.toString().replace(',','.')); if(isNaN(n)) return "text-gray-500"; if(n<=r) return "text-red-500 font-bold"; if(n<=o) return "text-orange-500 font-bold"; return "text-emerald-500 font-bold"; }
 
         function renderItems() {
-            updateVisibility(); toggleExtraColumns(); const s = document.getElementById('searchInput').value.toLowerCase(); const tb = document.getElementById('itemsTableBody'); tb.innerHTML = "";
+            updateVisibility(); toggleExtraColumns(); 
+            const s = document.getElementById('searchInput').value.toLowerCase(); 
+            const tb = document.getElementById('itemsTableBody'); tb.innerHTML = "";
+
+            // Filtro Preço
+            const pOp = document.getElementById('priceOp').value;
+            const pVal = parseFloat(document.getElementById('priceVal').value);
+
             let filtered = appData.items.filter(i => {
                 const mt = i.name.toLowerCase().includes(s) || (i.cat||'').toLowerCase().includes(s) || (i.subcat||'').toLowerCase().includes(s) || (i.establishment||'').toLowerCase().includes(s);
                 const mTag = activeTagFilters.length===0 || (i.tags && i.tags.some(t=>activeTagFilters.includes(t)));
                 const mCat = activeCatFilters.length===0 || activeCatFilters.includes(i.cat);
                 const mSub = activeSubcatFilters.length===0 || activeSubcatFilters.includes(i.subcat);
-                return mt && mTag && mCat && mSub;
+                const mEst = activeEstFilters.length===0 || activeEstFilters.includes(i.establishment);
+                
+                let mPrice = true;
+                if (pOp && !isNaN(pVal)) {
+                    const itemPrice = parseFloat(i.price) || 0;
+                    if(pOp === '>') mPrice = itemPrice > pVal;
+                    else if(pOp === '<') mPrice = itemPrice < pVal;
+                    else if(pOp === '>=') mPrice = itemPrice >= pVal;
+                    else if(pOp === '<=') mPrice = itemPrice <= pVal;
+                    else if(pOp === '==') mPrice = itemPrice === pVal;
+                    else if(pOp === '!=') mPrice = itemPrice !== pVal;
+                }
+
+                return mt && mTag && mCat && mSub && mEst && mPrice;
             });
             filtered.sort((a,b) => { let vA=a[sortCol]; let vB=b[sortCol]; if(typeof vA==='string') vA=vA.toLowerCase(); if(typeof vB==='string') vB=vB.toLowerCase(); if(vA<vB) return sortAsc?-1:1; if(vA>vB) return sortAsc?1:-1; return 0; });
 
@@ -513,7 +588,7 @@
         }
         function sortBy(col) { sortCol=col; sortAsc=!sortAsc; renderItems(); }
 
-        // MANIPULAÇÃO DE ITENS (Com Tags atualizadas inline)
+        // MANIPULAÇÃO DE ITENS
         function renderItemTagsCheckbox(sel=[]) { 
             const container = document.getElementById('itemTagsContainer');
             let html = appData.tags.map(t=>`<label class="cursor-pointer"><input type="checkbox" value="${t}" class="item-tag-cb hidden tag-checkbox" ${sel.includes(t)?'checked':''}><span class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs rounded-lg border transition shadow-sm">${t}</span></label>`).join(''); 
@@ -544,14 +619,14 @@
                 const old = appData.items[idx]; let chg = [];
                 if(old.qty != item.qty) chg.push(`Qtd: ${old.qty||0} ➔ ${item.qty||0}`);
                 if(old.name != item.name) chg.push(`Nome ➔ ${item.name}`);
-                if(old.cat != item.cat) chg.push(`Cat: ${old.cat||'-'} ➔ ${item.cat||'-'}`);
+                if(old.cat != item.cat) chg.push(`Cat ➔ ${item.cat||'-'}`);
                 if(old.price != item.price) chg.push(`R$ ${old.price||0} ➔ ${item.price||0}`);
                 appData.items[idx] = item;
                 addLog("Editou", `${item.name} ${chg.length>0 ? `(${chg.join(', ')})` : ''}`);
             }
 
             if(!appData.compendium.includes(n)){appData.compendium.push(n); renderCompendium();}
-            closeModal('itemModal'); renderItems(); saveData();
+            closeModal('itemModal'); renderQuickFilters(); renderItems(); saveData();
         }
         
         function editItem(id) { 
@@ -563,7 +638,7 @@
         }
         function deleteItem(id) { if(confirm("Deletar permanentemente?")){ const i=appData.items.findIndex(x=>x.id===id); const n = appData.items[i].name; appData.items.splice(i,1); addLog("Deletou", n); renderItems(); saveData(); } }
 
-        // ================= LISTA DE COMPRAS COM/SEM QTD =================
+        // ================= LISTA DE COMPRAS =================
         function openShoppingList() {
             const c=document.getElementById('shoppingListContainer'); c.innerHTML=""; document.getElementById('shoppingTextOutput').classList.add('hidden');
             const sorted=[...appData.items].sort((a,b)=>(a.cat||"").localeCompare(b.cat||"")); let lastCat=null;
@@ -585,7 +660,7 @@
         function copyShoppingList() { 
             const txt = getShoppingText(); const out = document.getElementById('shoppingTextOutput'); out.value = txt; out.classList.remove('hidden');
             out.select(); out.setSelectionRange(0, 99999);
-            try { document.execCommand('copy'); alert("Copiado com sucesso!"); } catch(e) { alert("Erro ao copiar. Selecione o texto e copie manualmente."); }
+            try { document.execCommand('copy'); alert("Copiado com sucesso!"); } catch(e) { alert("Erro ao copiar."); }
         }
         function shareWhatsApp() { window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(getShoppingText())}`, '_blank'); }
 
@@ -604,8 +679,7 @@
         function renderLogs() { document.getElementById('logsContainer').innerHTML = (appData.logs||[]).map(l=>`<div class="border-b dark:border-gray-700 pb-2 text-sm"><div class="text-[10px] text-gray-500">${l.date} - <b class="text-gray-800 dark:text-gray-300">${l.user}</b></div><div><span class="font-semibold text-primary">${l.action}:</span> ${l.details}</div></div>`).join(''); }
 
         function handleCSVUpload(e) {
-            const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader();
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
             reader.onload = function(evt) {
                 const text = evt.target.result; const lines = text.split(/\r?\n/);
                 if(lines.length < 2) return alert("Arquivo CSV vazio ou formato incorreto.");
@@ -622,8 +696,7 @@
                         itemTags.forEach(tg => { if(!appData.tags.includes(tg)) appData.tags.push(tg); }); count++;
                     }
                 });
-                alert(`${count} itens importados!`);
-                addLog("Importação CSV", `${count} itens carregados.`);
+                alert(`${count} itens importados!`); addLog("Importação CSV", `${count} itens carregados.`);
                 renderCategories(); renderTagsList(); renderCompendium(); renderItems(); saveData(); closeModal('exportModal');
             };
             reader.readAsText(file); e.target.value = '';
@@ -634,16 +707,12 @@
             else if(format==='csv') triggerDownload(new Blob(["Nome,Quantidade,Unidade,Categoria,Subcategoria,AlertaVermelho,AlertaLaranja,Validade,Local,Preco,Tags\n" + appData.items.map(i=>`${i.name},${i.qty||''},${i.unit||''},${i.cat||''},${i.subcat||''},${i.alertRed||1},${i.alertOrange||3},${i.expiry||''},${i.establishment||''},${i.price||0},${(i.tags||[]).join(';')}`).join('\n')], {type:"text/csv;charset=utf-8;"}), "estoque_emohouse.csv");
             else if(format==='txt') triggerDownload(new Blob(["=== ESTOQUE EMOHOUSE ===\n\n" + appData.items.map(i=>`- ${i.name}: ${i.qty||0} ${i.unit}`).join('\n')], {type:"text/plain;charset=utf-8;"}), "estoque_emohouse.txt");
             else if(format==='pdf') { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text("Estoque EMOHOUSE", 14, 15); doc.autoTable({head:[['Item','Qtd','Cat']], body:appData.items.map(i=>[i.name, i.qty||0, i.cat||''])}); doc.save("estoque_emohouse.pdf"); }
-            addLog("Exportação", `Dados exportados em ${format.toUpperCase()}`);
-            closeModal('exportModal');
+            addLog("Exportação", `Dados exportados em ${format.toUpperCase()}`); closeModal('exportModal');
         }
         function triggerDownload(b, f) { const l=document.createElement("a"); l.href=URL.createObjectURL(b); l.download=f; l.click(); }
 
         // ================= GITHUB SYNC =================
-        function saveGithubSettings() {
-            appData.settings.ghToken=document.getElementById('ghToken').value.trim(); appData.settings.ghRepo=document.getElementById('ghRepo').value.trim(); appData.settings.ghPath=document.getElementById('ghPath').value.trim();
-            saveData(false); alert("Salvo! Sincronizando..."); syncFromGithub();
-        }
+        function saveGithubSettings() { appData.settings.ghToken=document.getElementById('ghToken').value.trim(); appData.settings.ghRepo=document.getElementById('ghRepo').value.trim(); appData.settings.ghPath=document.getElementById('ghPath').value.trim(); saveData(false); alert("Salvo! Sincronizando..."); syncFromGithub(); }
         async function syncToGithub() { await syncPushGithub(); alert("Sincronizado na Nuvem!"); }
         async function syncFromGithub() {
             if(!appData.settings.ghToken) return;
