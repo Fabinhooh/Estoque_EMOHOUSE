@@ -74,12 +74,13 @@
                         <span id="displayUserName" class="block truncate max-w-[80px] sm:max-w-[150px]">Usuário</span>
                     </button>
                     <!-- Dropdown Perfil -->
-                    <div id="profileMenu" class="absolute right-0 mt-2 w-48 bg-white dark:bg-darkcard border dark:border-gray-700 rounded-xl shadow-lg hidden transition-all z-50">
+                    <div id="profileMenu" class="absolute right-0 mt-2 w-56 bg-white dark:bg-darkcard border dark:border-gray-700 rounded-xl shadow-lg hidden transition-all z-50">
                         <a href="#" onclick="openModal('settingsModal'); toggleDropdown('profileMenu')" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-xl text-sm border-b dark:border-gray-700"><i class="fa-solid fa-gear w-5 text-gray-400"></i> Configurações</a>
                         <a href="#" onclick="openModal('logsModal'); toggleDropdown('profileMenu')" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm border-b dark:border-gray-700"><i class="fa-solid fa-history w-5 text-gray-400"></i> Histórico</a>
-                        <a href="#" onclick="openModal('exportModal'); toggleDropdown('profileMenu')" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm"><i class="fa-solid fa-download w-5 text-gray-400"></i> Exportar / Importar</a>
-                        <div class="border-t dark:border-gray-700"></div>
-                        <a href="#" onclick="logout()" class="block px-4 py-3 text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-b-xl text-sm"><i class="fa-solid fa-arrow-right-from-bracket w-5"></i> Sair</a>
+                        <a href="#" onclick="openModal('importExportModal'); toggleDropdown('profileMenu')" class="block px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium text-sm border-b dark:border-gray-700"><i class="fa-solid fa-right-left w-5"></i> Importar / Exportar</a>
+                        <a href="#" onclick="openModal('reportModal'); toggleDropdown('profileMenu')" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm border-b dark:border-gray-700"><i class="fa-solid fa-file-pdf w-5 text-gray-400"></i> Relatórios (PDF/CSV)</a>
+                        <a href="#" onclick="openModal('batchCsvModal'); toggleDropdown('profileMenu')" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm border-b dark:border-gray-700"><i class="fa-solid fa-screwdriver-wrench w-5 text-gray-400"></i> Área Administrativa</a>
+                        <a href="#" onclick="logout()" class="block px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-xl text-sm"><i class="fa-solid fa-arrow-right-from-bracket w-5"></i> Sair</a>
                     </div>
                 </div>
             </div>
@@ -89,24 +90,32 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <main id="mainContent" class="hidden flex-grow max-w-6xl w-full mx-auto p-2 sm:p-4">
         
+        <!-- Indicador de Versão do Banco -->
+        <div class="mb-3 px-2 flex justify-between items-center bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
+            <span class="text-xs text-blue-700 dark:text-blue-300 font-medium">
+                <i class="fa-solid fa-database mr-1"></i> Base Atualizada: <span id="lastUpdatedText" class="font-bold">Nunca</span>
+            </span>
+            <span class="text-[10px] text-blue-600 dark:text-blue-400 hidden sm:block font-bold">Lembre-se de sempre Salvar antes de Exportar!</span>
+        </div>
+
         <!-- Barra de Ações -->
         <div class="bg-white dark:bg-darkcard p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 mb-4 flex flex-col gap-3">
             
             <div class="relative w-full">
                 <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400"></i>
-                <input type="text" id="searchInput" oninput="renderItems()" placeholder="Buscar item, categoria ou local..." class="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm focus:ring-2 focus:ring-primary outline-none shadow-inner">
+                <input type="text" id="searchInput" oninput="renderItems()" placeholder="Buscar item, categoria ou estabelecimento..." class="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm focus:ring-2 focus:ring-primary outline-none shadow-inner">
             </div>
 
             <div class="flex flex-col sm:flex-row gap-2 admin-only">
                 <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="manualSaveWithPrompt()" id="btnManualSave" class="flex-grow sm:flex-none bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold px-4 py-3 sm:py-2 rounded-lg transition shadow-sm"><i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Agora</button>
                     <button onclick="openItemModal()" class="flex-grow sm:flex-none bg-primary hover:bg-indigo-600 text-white text-sm font-bold px-4 py-3 sm:py-2 rounded-lg transition shadow-sm"><i class="fa-solid fa-plus mr-1"></i> Novo Item</button>
-                    <button onclick="syncToGithub()" id="syncBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm px-4 py-3 sm:py-2 rounded-lg transition shadow-sm" title="Sincronizar Nuvem"><i class="fa-solid fa-cloud-arrow-up"></i></button>
                 </div>
                 
                 <div class="relative w-full sm:w-auto">
                     <button onclick="toggleDropdown('manageMenu')" class="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-sm font-medium px-4 py-3 sm:py-2 rounded-lg transition flex justify-center items-center"><i class="fa-solid fa-bars-progress mr-2"></i> Gerenciar <i class="fa-solid fa-chevron-down ml-2 text-xs"></i></button>
                     <div id="manageMenu" class="absolute left-0 mt-2 w-full sm:w-48 bg-white dark:bg-darkcard border dark:border-gray-700 rounded-xl shadow-xl hidden transition-all z-20">
-                        <a href="#" onclick="openModal('categoryModal'); toggleDropdown('manageMenu')" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm rounded-t-xl border-b dark:border-gray-700"><i class="fa-solid fa-folder-open w-5 text-yellow-500"></i> <span class="lbl-cat">Categorias</span></a>
+                        <a href="#" onclick="openModal('categoryModal'); toggleDropdown('manageMenu')" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm rounded-t-xl border-b dark:border-gray-700"><i class="fa-solid fa-folder-open w-5 text-yellow-500"></i> Categorias</a>
                         <a href="#" onclick="openModal('tagsModal'); toggleDropdown('manageMenu')" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm border-b dark:border-gray-700"><i class="fa-solid fa-tags w-5 text-blue-500"></i> Filtros (Tags)</a>
                         <a href="#" onclick="openModal('compendiumModal'); toggleDropdown('manageMenu')" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm rounded-b-xl"><i class="fa-solid fa-book w-5 text-purple-500"></i> Dicionário</a>
                     </div>
@@ -144,6 +153,25 @@
 
     <!-- ================= MODAIS ================= -->
     
+    <!-- Modal Startup: Importação inicial -->
+    <div id="startupModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 animate-fade backdrop-blur-sm">
+        <div class="bg-white dark:bg-darkcard p-8 rounded-2xl w-full max-w-md shadow-2xl text-center border border-gray-100 dark:border-gray-700">
+            <i class="fa-solid fa-file-import text-5xl text-primary mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2">Atualização de Base de Dados</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Há algum arquivo de banco de dados <b>(.json)</b> para importar e atualizar o site agora?
+            </p>
+            <div class="text-xs text-blue-800 dark:text-blue-300 mb-6 bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-left border border-blue-100 dark:border-blue-800">
+                <strong><i class="fa-solid fa-circle-info mr-1"></i> Lembrete:</strong> Caso você vá fazer alterações, lembre-se de <b>Salvar Agora</b> e exportar o arquivo atualizado no menu <b>Importar/Exportar</b> ao final para compartilhar!
+            </div>
+            <div class="flex flex-col gap-3">
+                <input type="file" id="startupJsonUpload" accept=".json" class="hidden" onchange="handleJSONUpload(event)">
+                <button onclick="document.getElementById('startupJsonUpload').click()" class="w-full bg-primary text-white p-3 rounded-lg font-bold shadow-md hover:bg-indigo-600 transition"><i class="fa-solid fa-file-arrow-up mr-2"></i> Sim, Importar (.json)</button>
+                <button onclick="closeModal('startupModal')" class="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-3 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition">Não, Continuar com os Dados Atuais</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Item -->
     <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center backdrop-blur-sm p-4 animate-fade">
         <div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-lg border dark:border-gray-700 shadow-2xl max-h-full overflow-y-auto">
@@ -161,30 +189,28 @@
                 </div>
                 <div class="flex gap-2">
                     <div class="w-1/2">
-                        <label class="text-xs text-gray-500 dark:text-gray-400 uppercase lbl-cat">Categoria</label>
+                        <label class="text-xs text-gray-500 dark:text-gray-400 uppercase">Categoria</label>
                         <div class="flex gap-1 items-center">
                             <select id="itemCat" onchange="updateSubcatOptions()" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"></select>
-                            <button type="button" onclick="quickAddCategory()" class="p-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg hover:bg-emerald-200 transition" title="Adicionar Categoria Rápida"><i class="fa-solid fa-plus"></i></button>
+                            <button type="button" onclick="quickAddCategory()" class="p-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg hover:bg-emerald-200 transition" title="Criar Categoria Rápida"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
                     <div class="w-1/2">
-                        <label class="text-xs text-gray-500 dark:text-gray-400 uppercase lbl-subcat">Subcategoria</label>
+                        <label class="text-xs text-gray-500 dark:text-gray-400 uppercase">Subcategoria</label>
                         <div class="flex gap-1 items-center">
                             <select id="itemSubcat" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"></select>
-                            <button type="button" onclick="quickAddSubcat()" class="p-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg hover:bg-emerald-200 transition" title="Adicionar Subcategoria Rápida"><i class="fa-solid fa-plus"></i></button>
+                            <button type="button" onclick="quickAddSubcat()" class="p-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg hover:bg-emerald-200 transition" title="Criar Subcategoria Rápida"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
                 </div>
                 
                 <div>
                     <label class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1 block">Tags / Filtros do Produto</label>
-                    <div id="itemTagsContainer" class="flex flex-wrap gap-2 items-center">
-                        <!-- Gerado via JS -->
-                    </div>
+                    <div id="itemTagsContainer" class="flex flex-wrap gap-2 items-center"></div>
                 </div>
 
                 <div class="col-extra col-expiry hidden"><label class="text-xs text-gray-500 dark:text-gray-400 uppercase">Validade</label><input type="date" id="itemExpiry" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"></div>
-                <div class="col-extra col-establishment hidden"><label class="text-xs text-gray-500 dark:text-gray-400 uppercase">Local</label><input type="text" id="itemEstablishment" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"></div>
+                <div class="col-extra col-establishment hidden"><label class="text-xs text-gray-500 dark:text-gray-400 uppercase">Estabelecimento</label><input type="text" id="itemEstablishment" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"></div>
                 <div class="col-extra col-price hidden"><label class="text-xs text-gray-500 dark:text-gray-400 uppercase">Preço (R$)</label><input type="number" step="0.01" id="itemPrice" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"></div>
             </div>
             <div class="flex justify-end gap-2 mt-6">
@@ -194,17 +220,27 @@
         </div>
     </div>
 
-    <!-- Modal Lista Compras -->
+    <!-- Modal Lista Compras (Avançado com Filtros) -->
     <div id="shoppingListModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center backdrop-blur-sm p-4 animate-fade">
-        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-lg border dark:border-gray-700 shadow-2xl flex flex-col max-h-full">
-            <h2 class="text-xl font-bold mb-1"><i class="fa-solid fa-cart-arrow-down text-orange-500 mr-2"></i> Lista de Compras</h2>
+        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-2xl border dark:border-gray-700 shadow-2xl flex flex-col max-h-[95vh]">
+            <h2 class="text-xl font-bold mb-3"><i class="fa-solid fa-cart-arrow-down text-orange-500 mr-2"></i> Lista de Compras</h2>
             
+            <div class="mb-3 space-y-2">
+                <div class="relative w-full">
+                    <i class="fa-solid fa-search absolute left-3 top-2 text-gray-400 text-xs"></i>
+                    <input type="text" id="shoppingSearch" oninput="renderShoppingList()" placeholder="Buscar nome ou estabelecimento..." class="w-full pl-8 pr-3 py-1.5 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white text-xs focus:ring-2 focus:ring-orange-500 outline-none shadow-inner">
+                </div>
+                <div class="flex gap-2 overflow-x-auto pb-1 items-center" id="shoppingQuickFilters">
+                    <!-- Preenchido via JS exclusivamente para a lista de mercado -->
+                </div>
+            </div>
+
             <label class="flex items-center gap-2 mb-3 cursor-pointer text-xs sm:text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-700">
-                <input type="checkbox" id="chkShowQtdInList" class="w-4 h-4 text-primary focus:ring-primary rounded">
+                <input type="checkbox" id="chkShowQtdInList" class="w-4 h-4 text-orange-500 focus:ring-orange-500 rounded">
                 Enviar quantidade atual anotada junto
             </label>
             
-            <div id="shoppingListContainer" class="flex-grow overflow-y-auto space-y-1 border border-gray-100 dark:border-gray-700 p-2 rounded-lg mb-4"></div>
+            <div id="shoppingListContainer" class="flex-grow overflow-y-auto space-y-1 border border-gray-100 dark:border-gray-700 p-2 rounded-lg mb-4 bg-gray-50 dark:bg-gray-900/30"></div>
             <textarea id="shoppingTextOutput" rows="3" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white text-xs sm:text-sm mb-4 hidden focus:outline-none bg-gray-50 dark:bg-gray-900"></textarea>
 
             <div class="flex flex-col sm:flex-row justify-between gap-2">
@@ -222,90 +258,119 @@
         <div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-lg border dark:border-gray-700 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 class="text-xl font-bold mb-4"><i class="fa-solid fa-gear text-primary mr-2"></i> Configurações</h2>
             <div class="space-y-4">
-                
                 <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border dark:border-gray-700">
                     <h3 class="font-semibold mb-2 text-sm uppercase text-gray-500">Filtros Rápidos</h3>
                     <label class="flex items-center gap-2 cursor-pointer mb-2"><input type="checkbox" id="setEnableQuickFilters" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Habilitar botão de Filtros Rápidos</span></label>
-                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="setEnableCatFilters" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Incluir <span class="lbl-cat">Categorias</span> na barra de Filtros</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="setEnableCatFilters" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Incluir Categorias na barra de Filtros</span></label>
                 </div>
-
                 <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border dark:border-gray-700">
-                    <h3 class="font-semibold mb-2 text-sm uppercase text-gray-500">Campos Opcionais & Termos</h3>
-                    <label class="flex items-center gap-2 cursor-pointer mb-2"><input type="checkbox" id="setUseFolders" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Usar Termos "Pasta / Subpasta"</span></label>
+                    <h3 class="font-semibold mb-2 text-sm uppercase text-gray-500">Campos Opcionais do Produto</h3>
                     <label class="flex items-center gap-2 cursor-pointer mb-2"><input type="checkbox" id="setExpiry" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Data de Validade</span></label>
-                    <label class="flex items-center gap-2 cursor-pointer mb-2"><input type="checkbox" id="setEstablishment" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Local de Compra</span></label>
+                    <label class="flex items-center gap-2 cursor-pointer mb-2"><input type="checkbox" id="setEstablishment" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Estabelecimento de Compra</span></label>
                     <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="setPrice" onchange="updateSettings()" class="w-4 h-4 text-primary rounded"><span class="text-sm">Preço do Produto</span></label>
-                </div>
-
-                <div class="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-800">
-                    <h3 class="font-semibold mb-2 text-sm uppercase text-emerald-600 dark:text-emerald-400"><i class="fa-brands fa-github"></i> Auto-Sync Nuvem</h3>
-                    <input type="password" id="ghToken" placeholder="GitHub Token" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-800 dark:border-gray-600 text-sm">
-                    <input type="text" id="ghRepo" placeholder="Usuário/Repositorio" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-800 dark:border-gray-600 text-sm">
-                    <input type="text" id="ghPath" value="dados.json" class="w-full p-2 border rounded-lg mb-2 dark:bg-gray-800 dark:border-gray-600 text-sm">
-                    <button onclick="saveGithubSettings()" class="w-full bg-emerald-500 text-white p-2 rounded-lg text-sm font-bold shadow-sm">Salvar Nuvem</button>
                 </div>
             </div>
             <div class="flex justify-end mt-4"><button onclick="closeModal('settingsModal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-medium">Fechar</button></div>
         </div>
     </div>
 
-    <!-- Modal Exportar / Importar -->
-    <div id="exportModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center backdrop-blur-sm p-4 animate-fade">
+    <!-- Modal IMPORTAR / EXPORTAR JSON OFICIAL -->
+    <div id="importExportModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center backdrop-blur-sm p-4 animate-fade">
         <div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-sm border dark:border-gray-700 shadow-2xl text-center">
-            <h2 class="text-xl font-bold mb-4">Exportar / Importar</h2>
+            <h2 class="text-xl font-bold mb-4">Importar / Exportar</h2>
             
-            <div class="mb-6 p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800">
-                <p class="text-xs text-gray-500 mb-2 font-medium">Importar em Massa (CSV)</p>
-                <input type="file" id="csvUpload" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
-                <button onclick="document.getElementById('csvUpload').click()" class="w-full px-4 py-2 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-lg text-sm font-bold hover:bg-indigo-200 transition"><i class="fa-solid fa-file-arrow-up mr-1"></i> Carregar Arquivo CSV</button>
+            <div class="mb-4 p-4 border border-blue-200 dark:border-blue-900 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                <p class="text-xs text-blue-700 dark:text-blue-300 mb-2 font-medium">Restaurar / Atualizar Base (.json)</p>
+                <input type="file" id="jsonUpload" accept=".json" class="hidden" onchange="handleJSONUpload(event)">
+                <button onclick="document.getElementById('jsonUpload').click()" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm"><i class="fa-solid fa-file-arrow-up mr-1"></i> Importar JSON</button>
             </div>
 
-            <p class="text-xs text-gray-500 mb-2 font-medium">Baixar Backup</p>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="exportData('pdf')" class="p-2 bg-red-100 text-red-600 dark:bg-red-900/30 rounded-xl text-sm font-medium"><i class="fa-solid fa-file-pdf block text-lg mb-1"></i> PDF</button>
-                <button onclick="exportData('csv')" class="p-2 bg-green-100 text-green-600 dark:bg-green-900/30 rounded-xl text-sm font-medium"><i class="fa-solid fa-file-csv block text-lg mb-1"></i> CSV</button>
-                <button onclick="exportData('json')" class="p-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 rounded-xl text-sm font-medium"><i class="fa-solid fa-file-code block text-lg mb-1"></i> JSON</button>
-                <button onclick="exportData('txt')" class="p-2 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium"><i class="fa-solid fa-file-lines block text-lg mb-1"></i> TXT</button>
+            <div class="mb-2 p-4 border border-emerald-200 dark:border-emerald-900 rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
+                <p class="text-xs text-emerald-700 dark:text-emerald-300 mb-2 font-medium">Gerar Backup Atualizado para Compartilhar</p>
+                <button onclick="exportJSONInteractive(false)" class="w-full p-3 bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-emerald-700 transition shadow-sm"><i class="fa-solid fa-database mr-1"></i> Exportar JSON</button>
             </div>
-            <button onclick="closeModal('exportModal')" class="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-medium">Cancelar</button>
+            
+            <button onclick="closeModal('importExportModal')" class="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-medium mt-2">Fechar</button>
         </div>
     </div>
 
-    <!-- Modais Genéricos Simples (Agora com Lápis de Edição) -->
+    <!-- Modal RELATÓRIOS SIMPLES -->
+    <div id="reportModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center backdrop-blur-sm p-4 animate-fade">
+        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-sm border dark:border-gray-700 shadow-2xl text-center">
+            <h2 class="text-xl font-bold mb-4">Relatórios</h2>
+            <p class="text-xs text-gray-500 mb-4">Baixe uma versão simplificada para impressão ou leitura externa.</p>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="exportReport('pdf')" class="p-4 bg-red-100 text-red-600 dark:bg-red-900/30 rounded-xl text-sm font-bold hover:bg-red-200 transition"><i class="fa-solid fa-file-pdf block text-2xl mb-2"></i> PDF</button>
+                <button onclick="exportReport('csv')" class="p-4 bg-green-100 text-green-600 dark:bg-green-900/30 rounded-xl text-sm font-bold hover:bg-green-200 transition"><i class="fa-solid fa-file-csv block text-2xl mb-2"></i> Planilha Simples</button>
+            </div>
+            <button onclick="closeModal('reportModal')" class="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-medium">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modal ADMIN: BASE LOTE CSV -->
+    <div id="batchCsvModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center backdrop-blur-sm p-4 animate-fade">
+        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-md border dark:border-gray-700 shadow-2xl text-center">
+            <h2 class="text-xl font-bold mb-2"><i class="fa-solid fa-screwdriver-wrench text-red-500 mr-2"></i> Área Administrativa</h2>
+            <p class="text-xs text-gray-500 mb-6 font-medium text-left bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                ⚠️ <b>Atenção:</b> Área crítica para manipulação de dados do sistema (CSV). Só altere se souber o que estiver fazendo. Para importar ou exportar backups com a Bruna, use a aba <a href="#" onclick="closeModal('batchCsvModal'); openModal('importExportModal')" class="text-blue-500 underline">Importar/Exportar</a>.
+            </p>
+            
+            <div class="flex flex-col gap-3 mb-4">
+                <button onclick="exportBatchCSV()" class="w-full p-3 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition shadow-sm"><i class="fa-solid fa-download mr-1"></i> Baixar CSV Estrutural (Lote)</button>
+                
+                <input type="file" id="csvUpload" accept=".csv" class="hidden" onchange="handleBatchCSVUpload(event)">
+                <button onclick="promptCsvUpload()" class="w-full p-3 bg-gray-800 text-white dark:bg-gray-600 rounded-lg text-sm font-bold hover:bg-gray-900 dark:hover:bg-gray-500 transition shadow-sm"><i class="fa-solid fa-upload mr-1"></i> Upload de dados CSV (Em lote)</button>
+
+                <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                
+                <button onclick="clearDatabase()" class="w-full p-3 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition shadow-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Zerar Base de Dados</button>
+            </div>
+            
+            <button onclick="closeModal('batchCsvModal')" class="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-medium">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modais Genéricos Simples (Com Lápis de Edição) -->
     <div id="tagsModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 animate-fade"><div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-sm"><h2 class="text-xl font-bold mb-4">Gerenciar Tags</h2><div class="flex gap-2 mb-4"><input type="text" id="newTagName" class="w-full p-2 border rounded-lg text-sm dark:bg-gray-800 focus:ring-primary outline-none"><button onclick="addTag()" class="bg-primary text-white px-3 py-2 rounded-lg"><i class="fa-solid fa-plus"></i></button></div><div id="tagsList" class="max-h-60 overflow-y-auto space-y-2"></div><div class="flex justify-end mt-4"><button onclick="closeModal('tagsModal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-bold">Fechar</button></div></div></div>
     <div id="compendiumModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 animate-fade"><div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-sm"><h2 class="text-xl font-bold mb-4">Dicionário</h2><div class="flex gap-2 mb-4"><input type="text" id="newCompName" class="w-full p-2 border rounded-lg text-sm dark:bg-gray-800 focus:ring-primary outline-none"><button onclick="addCompendium()" class="bg-primary text-white px-3 py-2 rounded-lg"><i class="fa-solid fa-plus"></i></button></div><div id="compendiumListUI" class="max-h-60 overflow-y-auto space-y-2"></div><div class="flex justify-end mt-4"><button onclick="closeModal('compendiumModal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-bold">Fechar</button></div></div></div>
     <div id="categoryModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 animate-fade"><div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-md"><h2 class="text-xl font-bold mb-4">Categorias</h2><div class="flex gap-2 mb-4"><input type="text" id="newCatName" class="w-full p-2 border rounded-lg text-sm dark:bg-gray-800 focus:ring-primary outline-none"><button onclick="addCategory()" class="bg-primary text-white px-3 py-2 rounded-lg"><i class="fa-solid fa-plus"></i></button></div><div id="categoriesList" class="max-h-60 overflow-y-auto space-y-2 p-2"></div><div class="flex justify-end mt-4"><button onclick="closeModal('categoryModal')" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-bold">Fechar</button></div></div></div>
-    <div id="logsModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 animate-fade"><div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-xl"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">Histórico</h2><button onclick="closeModal('logsModal')"><i class="fa-solid fa-xmark text-xl"></i></button></div><div id="logsContainer" class="max-h-[60vh] overflow-y-auto space-y-3 p-2"></div></div></div>
+    <div id="logsModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4 animate-fade"><div class="bg-white dark:bg-darkcard p-6 rounded-2xl w-full max-w-xl"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">Histórico</h2><button onclick="closeModal('logsModal')"><i class="fa-solid fa-xmark text-xl"></i></button></div><div id="logsContainer" class="max-h-[60vh] overflow-y-auto space-y-3 p-2 border border-gray-100 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900"></div></div></div>
 
     <script>
-        // ESTRUTURA DE DADOS
+        // ================= ESTRUTURA DE DADOS BASE =================
         let appData = {
             items: [], categories: [{ name: "Alimentos", subcats: ["Despensa"] }, { name: "Limpeza", subcats: [] }],
             tags: ["Perecível", "Urgente", "Pesado", "Uso Diário"], compendium: ["Arroz", "Feijão", "Detergente"], logs: [],
+            lastUpdated: null,
             settings: { 
-                useFolders: false, showExpiry: false, showEstablishment: false, showPrice: false, 
+                showExpiry: false, showEstablishment: false, showPrice: false, 
                 enableQuickFilters: true, enableCatFilters: true,
-                ghToken: "", ghRepo: "", ghPath: "dados.json", ghSha: "",
                 colOrder: ['name', 'qty', 'cat', 'expiry', 'establishment', 'price', 'actions']
             }
         };
 
         const colDefs = {
             name: { label: "Item", sort: true, show: true }, qty: { label: "Quantidade", sort: true, show: true }, cat: { label: "Categoria / Tags", sort: false, show: true },
-            expiry: { label: "Validade", sort: false, show: false }, establishment: { label: "Local", sort: false, show: false }, price: { label: "Preço", sort: false, show: false },
+            expiry: { label: "Validade", sort: false, show: false }, establishment: { label: "Estabelecimento", sort: false, show: false }, price: { label: "Preço", sort: false, show: false },
             actions: { label: "Ações", sort: false, show: true }
         };
 
         let currentUser = ""; let sortCol = "name"; let sortAsc = true;
-        let activeTagFilters = []; let activeCatFilters = []; let activeSubcatFilters = [];
+        let activeTagFilters = []; let activeCatFilters = []; let activeSubcatFilters = []; let activeStatusFilters = [];
+        let shopActiveTags = []; let shopActiveCats = []; let shopActiveSubcats = []; let shopActiveStatus = [];
         let isReadOnly = false; let draggedCol = null;
 
+        // ================= INICIALIZAÇÃO =================
         window.onload = () => {
             currentUser = localStorage.getItem("inv_user");
             const localData = localStorage.getItem("inv_data");
             if (localData) {
                 try {
-                    const parsed = JSON.parse(localData); appData = { ...appData, ...parsed }; 
+                    const parsed = JSON.parse(localData); 
+                    if(parsed.settings) {
+                        delete parsed.settings.useFolders; delete parsed.settings.ghToken; delete parsed.settings.ghRepo; delete parsed.settings.ghPath; delete parsed.settings.ghSha;
+                    }
+                    appData = { ...appData, ...parsed }; 
                     if(!appData.settings.colOrder) appData.settings.colOrder = ['name', 'qty', 'cat', 'expiry', 'establishment', 'price', 'actions'];
                     if(appData.settings.enableQuickFilters === undefined) appData.settings.enableQuickFilters = true;
                     if(appData.settings.enableCatFilters === undefined) appData.settings.enableCatFilters = true;
@@ -313,22 +378,29 @@
             }
             if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
             updateThemeIcon();
-            if (currentUser) { iniciarInterfacePrincipal(); } else { document.getElementById('loginScreen').classList.replace('hidden', 'flex'); }
+            
+            if (currentUser) { 
+                iniciarInterfacePrincipal(); 
+                if(!sessionStorage.getItem('skipStartupModal')) openModal('startupModal');
+                sessionStorage.removeItem('skipStartupModal');
+            } else { 
+                document.getElementById('loginScreen').classList.replace('hidden', 'flex'); 
+            }
         };
 
-        function login() { const inp = document.getElementById('loginName'); if(!inp.value.trim()) return; inp.blur(); currentUser = inp.value.trim(); localStorage.setItem("inv_user", currentUser); iniciarInterfacePrincipal(); }
-        function iniciarInterfacePrincipal() {
-            document.getElementById('loginScreen').classList.replace('flex', 'hidden');
-            document.getElementById('mainHeader').classList.remove('hidden'); document.getElementById('mainContent').classList.remove('hidden');
-            document.getElementById('displayUserName').innerText = currentUser;
-            applySettingsUI(); renderCategories(); renderTagsList(); renderCompendium(); renderTableHeaders(); renderItems();
-            if(appData.settings.ghToken) syncFromGithub();
-        }
-
+        // ================= LOGIN & UI BASICS =================
+        function login() { const inp = document.getElementById('loginName'); if(!inp.value.trim()) return; inp.blur(); currentUser = inp.value.trim(); localStorage.setItem("inv_user", currentUser); iniciarInterfacePrincipal(); openModal('startupModal'); }
         function logout() { localStorage.removeItem("inv_user"); location.reload(); }
         function toggleTheme() { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', isDark?'dark':'light'); updateThemeIcon(); }
         function updateThemeIcon() { document.getElementById('themeIcon').className = document.documentElement.classList.contains('dark') ? "fa-solid fa-sun text-yellow-400 text-lg" : "fa-solid fa-moon text-lg"; }
         
+        function iniciarInterfacePrincipal() {
+            document.getElementById('loginScreen').classList.replace('flex', 'hidden');
+            document.getElementById('mainHeader').classList.remove('hidden'); document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('displayUserName').innerText = currentUser;
+            applySettingsUI(); renderCategories(); renderTagsList(); renderCompendium(); renderTableHeaders(); renderItems(); updateTimestampUI();
+        }
+
         function toggleReadOnly() {
             isReadOnly = !isReadOnly; const btn = document.getElementById('btnReadOnly');
             if(isReadOnly) { btn.classList.replace('bg-gray-200', 'bg-blue-500'); btn.classList.replace('dark:bg-gray-700', 'dark:bg-blue-600'); btn.innerHTML = '<i class="fa-solid fa-eye text-white"></i>'; document.querySelectorAll('.admin-only').forEach(e => e.classList.add('hidden')); } 
@@ -338,144 +410,89 @@
 
         function toggleDropdown(id) { const menu = document.getElementById(id); if(menu.classList.contains('hidden')) { document.querySelectorAll('.absolute.z-20, .absolute.z-50').forEach(m => m.classList.add('hidden')); menu.classList.remove('hidden'); } else { menu.classList.add('hidden'); } }
         document.addEventListener('click', (e) => { if(!e.target.closest('.relative')) document.querySelectorAll('.absolute.z-20, .absolute.z-50').forEach(m => m.classList.add('hidden')); });
-
         function toggleFilters() { document.getElementById('quickTagsFilter').classList.toggle('hidden'); }
         function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
-        function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); if(id === 'startupModal') sessionStorage.setItem('skipStartupModal', 'true'); }
 
-        async function saveData(sync = true) { localStorage.setItem("inv_data", JSON.stringify(appData)); if(sync && appData.settings.ghToken) await syncPushGithub(); }
-        function addLog(action, details) { appData.logs.unshift({ date: new Date().toLocaleString('pt-BR'), user: currentUser, action, details }); if(appData.logs.length > 50) appData.logs.pop(); renderLogs(); }
+        // ================= DADOS E TEMPO =================
+        function updateTimestampUI() { const el = document.getElementById('lastUpdatedText'); if(appData.lastUpdated) el.innerText = new Date(appData.lastUpdated).toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'}); else el.innerText = "Nunca"; }
+        function manualSaveWithPrompt() {
+            appData.lastUpdated = new Date().toISOString(); saveData(false); updateTimestampUI();
+            if(confirm("Dados salvos com sucesso na sua máquina!\nDeseja exportar e compartilhar agora esse arquivo atualizado?")) exportJSONInteractive(true); 
+            else { const btn = document.getElementById('btnManualSave'); const oldH = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Salvo!'; btn.classList.replace('bg-blue-500', 'bg-emerald-500'); btn.classList.replace('hover:bg-blue-600', 'hover:bg-emerald-600'); setTimeout(() => { btn.innerHTML = oldH; btn.classList.replace('bg-emerald-500', 'bg-blue-500'); btn.classList.replace('hover:bg-emerald-600', 'hover:bg-blue-600'); }, 2000); }
+        }
+        function manualSaveSilent() { appData.lastUpdated = new Date().toISOString(); saveData(false); updateTimestampUI(); }
+        function saveData() { localStorage.setItem("inv_data", JSON.stringify(appData)); }
+        function addLog(action, details) { appData.logs.unshift({ date: new Date().toLocaleString('pt-BR'), user: currentUser, action, details }); if(appData.logs.length > 100) appData.logs.pop(); renderLogs(); }
+        function getItemStatus(i) { if(!i.qty || i.qty.toString().trim() === "") return "none"; const num = parseFloat(i.qty.toString().replace(',','.')); if(isNaN(num)) return "none"; if(num <= (i.alertRed||1)) return "red"; if(num <= (i.alertOrange||3)) return "orange"; return "green"; }
 
-        // ================= GERENCIADORES (Filtros, Dicionario, Cats) =================
-        function renderQuickFilters() {
-            const q = document.getElementById('quickTagsFilter'); q.innerHTML = "";
-            if(!appData.settings.enableQuickFilters) { q.classList.add('hidden'); document.getElementById('btnToggleFilters').classList.add('hidden'); return; } else { document.getElementById('btnToggleFilters').classList.remove('hidden'); }
+        // ================= FILTROS E BOTÕES =================
+        function generateFilterButtons(targetEl, actCats, actSubcats, actTags, actStatus, togglePrefix) {
+            const q = document.getElementById(targetEl); q.innerHTML = "";
+            const sR = actStatus.includes('red'); const sO = actStatus.includes('orange'); const sG = actStatus.includes('green');
+            q.innerHTML += `<button onclick="${togglePrefix}Status('red')" class="px-3 py-1 rounded-full text-xs font-bold border transition whitespace-nowrap ${sR ? 'bg-red-500 text-white border-red-500' : 'bg-white dark:bg-gray-800 text-red-600 border-red-200 dark:border-red-800'}">🔴 Crítico</button>`;
+            q.innerHTML += `<button onclick="${togglePrefix}Status('orange')" class="px-3 py-1 rounded-full text-xs font-bold border transition whitespace-nowrap ${sO ? 'bg-orange-500 text-white border-orange-500' : 'bg-white dark:bg-gray-800 text-orange-500 border-orange-200 dark:border-orange-800'}">🟠 Atenção</button>`;
+            q.innerHTML += `<button onclick="${togglePrefix}Status('green')" class="px-3 py-1 rounded-full text-xs font-bold border transition whitespace-nowrap ${sG ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white dark:bg-gray-800 text-emerald-600 border-emerald-200 dark:border-emerald-800'}">🟢 Normal</button>`;
+            q.innerHTML += `<div class="h-6 border-l border-gray-300 dark:border-gray-600 mx-1"></div>`; 
             if(appData.settings.enableCatFilters) {
                 appData.categories.forEach(c => {
-                    const act = activeCatFilters.includes(c.name);
-                    q.innerHTML += `<button onclick="toggleCatFilter('${c.name}')" class="px-3 py-1 rounded-full text-xs font-bold border transition whitespace-nowrap ${act ? 'bg-yellow-500 text-white border-yellow-500 shadow-inner' : 'bg-white dark:bg-gray-800 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50'}">${c.name}</button>`;
+                    const act = actCats.includes(c.name);
+                    q.innerHTML += `<button onclick="${togglePrefix}Cat('${c.name}')" class="px-3 py-1 rounded-full text-xs font-bold border transition whitespace-nowrap ${act ? 'bg-yellow-500 text-white border-yellow-500 shadow-inner' : 'bg-white dark:bg-gray-800 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800'}">${c.name}</button>`;
                     c.subcats.forEach(s => {
-                        const actS = activeSubcatFilters.includes(s);
-                        q.innerHTML += `<button onclick="toggleSubcatFilter('${s}')" class="px-3 py-1 rounded-full text-xs font-medium border transition whitespace-nowrap ${actS ? 'bg-yellow-400 text-white border-yellow-400 shadow-inner' : 'bg-white dark:bg-gray-800 text-yellow-500 dark:text-yellow-300 border-yellow-100 dark:border-yellow-700/50 hover:bg-yellow-50'}">${s}</button>`;
+                        const actS = actSubcats.includes(s);
+                        q.innerHTML += `<button onclick="${togglePrefix}Subcat('${s}')" class="px-3 py-1 rounded-full text-xs font-medium border transition whitespace-nowrap ${actS ? 'bg-yellow-400 text-white border-yellow-400 shadow-inner' : 'bg-white dark:bg-gray-800 text-yellow-500 dark:text-yellow-300 border-yellow-100'}">${s}</button>`;
                     });
                 });
                 if(appData.categories.length > 0) q.innerHTML += `<div class="h-6 border-l border-gray-300 dark:border-gray-600 mx-1"></div>`; 
             }
             appData.tags.forEach(t => {
-                const act = activeTagFilters.includes(t);
-                q.innerHTML += `<button onclick="toggleTagFilter('${t}')" class="px-3 py-1 rounded-full text-xs font-medium border transition whitespace-nowrap ${act ? 'bg-primary text-white border-primary shadow-inner' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100'}">${t}</button>`;
+                const act = actTags.includes(t);
+                q.innerHTML += `<button onclick="${togglePrefix}Tag('${t}')" class="px-3 py-1 rounded-full text-xs font-medium border transition whitespace-nowrap ${act ? 'bg-primary text-white border-primary shadow-inner' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200'}">${t}</button>`;
             });
         }
+        function renderQuickFilters() { const q = document.getElementById('quickTagsFilter'); if(!appData.settings.enableQuickFilters) { q.classList.add('hidden'); document.getElementById('btnToggleFilters').classList.add('hidden'); return; } else { document.getElementById('btnToggleFilters').classList.remove('hidden'); } generateFilterButtons('quickTagsFilter', activeCatFilters, activeSubcatFilters, activeTagFilters, activeStatusFilters, 'toggleMain'); }
+        function renderShoppingFilters() { generateFilterButtons('shoppingQuickFilters', shopActiveCats, shopActiveSubcats, shopActiveTags, shopActiveStatus, 'toggleShop'); }
 
+        function toggleMainStatus(s) { activeStatusFilters.includes(s) ? activeStatusFilters=activeStatusFilters.filter(x=>x!==s) : activeStatusFilters.push(s); renderQuickFilters(); renderItems(); }
+        function toggleMainTag(t) { activeTagFilters.includes(t) ? activeTagFilters=activeTagFilters.filter(x=>x!==t) : activeTagFilters.push(t); renderQuickFilters(); renderItems(); }
+        function toggleMainCat(c) { activeCatFilters.includes(c) ? activeCatFilters=activeCatFilters.filter(x=>x!==c) : activeCatFilters.push(c); renderQuickFilters(); renderItems(); }
+        function toggleMainSubcat(s) { activeSubcatFilters.includes(s) ? activeSubcatFilters=activeSubcatFilters.filter(x=>x!==s) : activeSubcatFilters.push(s); renderQuickFilters(); renderItems(); }
+        function toggleShopStatus(s) { shopActiveStatus.includes(s) ? shopActiveStatus=shopActiveStatus.filter(x=>x!==s) : shopActiveStatus.push(s); renderShoppingList(); }
+        function toggleShopTag(t) { shopActiveTags.includes(t) ? shopActiveTags=shopActiveTags.filter(x=>x!==t) : shopActiveTags.push(t); renderShoppingList(); }
+        function toggleShopCat(c) { shopActiveCats.includes(c) ? shopActiveCats=shopActiveCats.filter(x=>x!==c) : shopActiveCats.push(c); renderShoppingList(); }
+        function toggleShopSubcat(s) { shopActiveSubcats.includes(s) ? shopActiveSubcats=shopActiveSubcats.filter(x=>x!==s) : shopActiveSubcats.push(s); renderShoppingList(); }
+
+        // ================= GERENCIADORES (Tags, Dicionario, Categorias) =================
         function getModalSelectedTags() { return Array.from(document.querySelectorAll('.item-tag-cb:checked')).map(c=>c.value); }
-
-        function renderTagsList() { 
-            const lt=document.getElementById('tagsList'); lt.innerHTML=""; 
-            appData.tags.forEach((t,i) => { lt.innerHTML += `<div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded mb-1 text-sm font-medium"><span>${t}</span><div><button onclick="editTag(${i})" class="text-blue-500 mr-3"><i class="fa-solid fa-pen text-xs"></i></button><button onclick="removeTag(${i})" class="text-red-500"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`; }); 
-            renderQuickFilters(); 
-        }
-        function addTag() { 
-            const v=document.getElementById('newTagName').value.trim(); 
-            if(v && !appData.tags.includes(v)){
-                appData.tags.push(v); addLog("Criou Tag", v); document.getElementById('newTagName').value=""; 
-                const sel = document.getElementById('itemModal').classList.contains('flex') ? getModalSelectedTags() : [];
-                renderTagsList(); 
-                if(document.getElementById('itemModal').classList.contains('flex')) renderItemTagsCheckbox(sel);
-                saveData(); renderItems();
-            } 
-        }
-        function editTag(i) {
-            const old = appData.tags[i]; const n = prompt("Editar Tag (Filtro):", old);
-            if(n && n.trim() && n.trim() !== old) {
-                const newVal = n.trim(); appData.tags[i] = newVal;
-                appData.items.forEach(item => { if(item.tags && item.tags.includes(old)) item.tags[item.tags.indexOf(old)] = newVal; });
-                if(activeTagFilters.includes(old)) activeTagFilters[activeTagFilters.indexOf(old)] = newVal;
-                const sel = document.getElementById('itemModal').classList.contains('flex') ? getModalSelectedTags() : [];
-                if(sel.includes(old)) sel[sel.indexOf(old)] = newVal;
-                addLog("Editou Tag", `${old} -> ${newVal}`);
-                renderTagsList(); if(document.getElementById('itemModal').classList.contains('flex')) renderItemTagsCheckbox(sel); renderItems(); saveData();
-            }
-        }
-        function removeTag(i) { 
-            const sel = document.getElementById('itemModal').classList.contains('flex') ? getModalSelectedTags() : [];
-            appData.tags.splice(i,1); renderTagsList(); 
-            if(document.getElementById('itemModal').classList.contains('flex')) renderItemTagsCheckbox(sel.filter(t=>appData.tags.includes(t)));
-            renderItems(); saveData(); 
-        }
-        
-        function toggleTagFilter(t) { activeTagFilters.includes(t) ? activeTagFilters=activeTagFilters.filter(x=>x!==t) : activeTagFilters.push(t); renderQuickFilters(); renderItems(); }
-        function toggleCatFilter(c) { activeCatFilters.includes(c) ? activeCatFilters=activeCatFilters.filter(x=>x!==c) : activeCatFilters.push(c); renderQuickFilters(); renderItems(); }
-        function toggleSubcatFilter(s) { activeSubcatFilters.includes(s) ? activeSubcatFilters=activeSubcatFilters.filter(x=>x!==s) : activeSubcatFilters.push(s); renderQuickFilters(); renderItems(); }
+        function renderTagsList() { const lt=document.getElementById('tagsList'); lt.innerHTML=""; appData.tags.forEach((t,i) => { lt.innerHTML += `<div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded mb-1 text-sm font-medium"><span>${t}</span><div><button onclick="editTag(${i})" class="text-blue-500 mr-3"><i class="fa-solid fa-pen text-xs"></i></button><button onclick="removeTag(${i})" class="text-red-500"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`; }); renderQuickFilters(); }
+        function addTag() { const v=document.getElementById('newTagName').value.trim(); if(v && !appData.tags.includes(v)){ appData.tags.push(v); addLog("Criou Tag", v); document.getElementById('newTagName').value=""; const sel = document.getElementById('itemModal').classList.contains('flex') ? getModalSelectedTags() : []; renderTagsList(); if(document.getElementById('itemModal').classList.contains('flex')) renderItemTagsCheckbox(sel); manualSaveSilent(); renderItems(); } }
+        function editTag(i) { const old = appData.tags[i]; const n = prompt("Editar Tag (Filtro):", old); if(n && n.trim() && n.trim() !== old) { const newVal = n.trim(); appData.tags[i] = newVal; appData.items.forEach(item => { if(item.tags && item.tags.includes(old)) item.tags[item.tags.indexOf(old)] = newVal; }); if(activeTagFilters.includes(old)) activeTagFilters[activeTagFilters.indexOf(old)] = newVal; const sel = document.getElementById('itemModal').classList.contains('flex') ? getModalSelectedTags() : []; if(sel.includes(old)) sel[sel.indexOf(old)] = newVal; addLog("Editou Tag", `${old} -> ${newVal}`); renderTagsList(); if(document.getElementById('itemModal').classList.contains('flex')) renderItemTagsCheckbox(sel); renderItems(); manualSaveSilent(); } }
+        function removeTag(i) { const sel = document.getElementById('itemModal').classList.contains('flex') ? getModalSelectedTags() : []; appData.tags.splice(i,1); renderTagsList(); if(document.getElementById('itemModal').classList.contains('flex')) renderItemTagsCheckbox(sel.filter(t=>appData.tags.includes(t))); renderItems(); manualSaveSilent(); }
         
         function renderCompendium() { const dl=document.getElementById('compendiumList'); const lt=document.getElementById('compendiumListUI'); dl.innerHTML=""; lt.innerHTML=""; appData.compendium.forEach((c,i)=>{ dl.innerHTML+=`<option value="${c}">`; lt.innerHTML+=`<div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded mb-1 text-sm font-medium"><span>${c}</span><div><button onclick="editCompendium(${i})" class="text-blue-500 mr-3"><i class="fa-solid fa-pen text-xs"></i></button><button onclick="removeCompendium(${i})" class="text-red-500"><i class="fa-solid fa-trash text-xs"></i></button></div></div>`; }); }
-        function addCompendium() { const v=document.getElementById('newCompName').value.trim(); if(v && !appData.compendium.includes(v)){appData.compendium.push(v); document.getElementById('newCompName').value=""; renderCompendium(); saveData();} }
-        function editCompendium(i) { const old = appData.compendium[i]; const n = prompt("Editar nome no dicionário:", old); if(n && n.trim() && n.trim() !== old) { appData.compendium[i] = n.trim(); addLog("Editou Dicionário", `${old} -> ${n.trim()}`); renderCompendium(); saveData(); } }
-        function removeCompendium(i) { appData.compendium.splice(i,1); renderCompendium(); saveData(); }
+        function addCompendium() { const v=document.getElementById('newCompName').value.trim(); if(v && !appData.compendium.includes(v)){appData.compendium.push(v); document.getElementById('newCompName').value=""; renderCompendium(); manualSaveSilent();} }
+        function editCompendium(i) { const old = appData.compendium[i]; const n = prompt("Editar nome no dicionário:", old); if(n && n.trim() && n.trim() !== old) { appData.compendium[i] = n.trim(); addLog("Editou Dicionário", `${old} -> ${n.trim()}`); renderCompendium(); manualSaveSilent(); } }
+        function removeCompendium(i) { appData.compendium.splice(i,1); renderCompendium(); manualSaveSilent(); }
 
-        function renderCategories() { 
-            const cL=document.getElementById('categoriesList'); const sC=document.getElementById('itemCat'); 
-            cL.innerHTML=""; sC.innerHTML='<option value="">Nenhuma</option>'; 
-            appData.categories.forEach((c,i)=>{ 
-                cL.innerHTML+=`<div class="flex justify-between items-center bg-gray-50 dark:bg-gray-800 p-2 rounded text-sm mb-1"><span class="font-bold">${c.name}</span><div><button onclick="editCategory(${i})" class="text-blue-500 mr-2 text-xs"><i class="fa-solid fa-pen"></i></button><button onclick="addSubcatPrompt(${i})" class="text-emerald-600 dark:text-emerald-400 mr-2 text-xs"><i class="fa-solid fa-plus"></i> Sub</button><button onclick="removeCategory(${i})" class="text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button></div></div>`; 
-                if(c.subcats.length>0) {
-                    let sH = '<div class="pl-4 pr-1 pb-2 space-y-1">';
-                    c.subcats.forEach((s, sIdx) => { sH += `<div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 p-1.5 rounded border border-gray-100 dark:border-gray-700"><span>${s}</span><div><button onclick="editSubcat(${i}, ${sIdx})" class="text-blue-500 mr-3"><i class="fa-solid fa-pen"></i></button><button onclick="removeSubcat(${i}, ${sIdx})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></div></div>`; });
-                    sH += '</div>'; cL.innerHTML += sH;
-                }
-                sC.innerHTML+=`<option value="${c.name}">${c.name}</option>`; 
-            }); 
-            renderQuickFilters(); 
-        }
-        function addCategory() { const n=document.getElementById('newCatName').value.trim(); if(n){appData.categories.push({name:n,subcats:[]}); addLog("Criou Categoria", n); renderCategories(); saveData();} }
-        function editCategory(i) { const old = appData.categories[i].name; const n = prompt("Editar Categoria:", old); if(n && n.trim() && n.trim() !== old) { const newVal = n.trim(); appData.categories[i].name = newVal; appData.items.forEach(item => { if(item.cat === old) item.cat = newVal; }); if(activeCatFilters.includes(old)) activeCatFilters[activeCatFilters.indexOf(old)] = newVal; addLog("Editou Categoria", `${old} -> ${newVal}`); renderCategories(); renderItems(); saveData(); } }
-        function removeCategory(i) { if(confirm("Remover esta categoria inteira?")) { appData.categories.splice(i,1); renderCategories(); saveData(); } }
-        function addSubcatPrompt(i) { const s=prompt("Subcategoria:"); if(s){appData.categories[i].subcats.push(s.trim()); addLog("Criou Sub", s.trim()); renderCategories(); saveData();} }
-        function editSubcat(cIdx, sIdx) { const old = appData.categories[cIdx].subcats[sIdx]; const cN = appData.categories[cIdx].name; const n = prompt("Editar Subcategoria:", old); if(n && n.trim() && n.trim() !== old) { const newVal = n.trim(); appData.categories[cIdx].subcats[sIdx] = newVal; appData.items.forEach(item => { if(item.cat === cN && item.subcat === old) item.subcat = newVal; }); if(activeSubcatFilters.includes(old)) activeSubcatFilters[activeSubcatFilters.indexOf(old)] = newVal; addLog("Editou Sub", `${old} -> ${newVal}`); renderCategories(); renderItems(); saveData(); } }
-        function removeSubcat(cIdx, sIdx) { if(confirm("Remover esta subcategoria?")) { appData.categories[cIdx].subcats.splice(sIdx, 1); renderCategories(); saveData(); } }
-
-        function quickAddCategory() {
-            const n = prompt("Nome da Nova Categoria:");
-            if(n && n.trim()) {
-                const name = n.trim();
-                if(!appData.categories.find(c=>c.name===name)) { appData.categories.push({name: name, subcats: []}); renderCategories(); }
-                document.getElementById('itemCat').value = name; updateSubcatOptions(); saveData(false);
-            }
-        }
-        function quickAddSubcat() {
-            const cN = document.getElementById('itemCat').value; if(!cN) return alert("Selecione uma Categoria primeiro.");
-            const n = prompt(`Nova Subcategoria para ${cN}:`);
-            if(n && n.trim()) {
-                const name = n.trim(); const cat = appData.categories.find(c=>c.name===cN);
-                if(cat && !cat.subcats.includes(name)) { cat.subcats.push(name); renderCategories(); }
-                document.getElementById('itemCat').value = cN; updateSubcatOptions(); document.getElementById('itemSubcat').value = name; saveData(false);
-            }
-        }
-
+        function renderCategories() { const cL=document.getElementById('categoriesList'); const sC=document.getElementById('itemCat'); cL.innerHTML=""; sC.innerHTML='<option value="">Nenhuma</option>'; appData.categories.forEach((c,i)=>{ cL.innerHTML+=`<div class="flex justify-between items-center bg-gray-50 dark:bg-gray-800 p-2 rounded text-sm mb-1"><span class="font-bold">${c.name}</span><div><button onclick="editCategory(${i})" class="text-blue-500 mr-2 text-xs"><i class="fa-solid fa-pen"></i></button><button onclick="addSubcatPrompt(${i})" class="text-emerald-600 dark:text-emerald-400 mr-2 text-xs"><i class="fa-solid fa-plus"></i> Sub</button><button onclick="removeCategory(${i})" class="text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button></div></div>`; if(c.subcats.length>0) { let sH = '<div class="pl-4 pr-1 pb-2 space-y-1">'; c.subcats.forEach((s, sIdx) => { sH += `<div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 p-1.5 rounded border border-gray-100 dark:border-gray-700"><span>${s}</span><div><button onclick="editSubcat(${i}, ${sIdx})" class="text-blue-500 mr-3"><i class="fa-solid fa-pen"></i></button><button onclick="removeSubcat(${i}, ${sIdx})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></div></div>`; }); sH += '</div>'; cL.innerHTML += sH; } sC.innerHTML+=`<option value="${c.name}">${c.name}</option>`; }); renderQuickFilters(); }
+        function addCategory() { const n=document.getElementById('newCatName').value.trim(); if(n){appData.categories.push({name:n,subcats:[]}); addLog("Criou Categoria", n); renderCategories(); manualSaveSilent();} }
+        function editCategory(i) { const old = appData.categories[i].name; const n = prompt("Editar Categoria:", old); if(n && n.trim() && n.trim() !== old) { const newVal = n.trim(); appData.categories[i].name = newVal; appData.items.forEach(item => { if(item.cat === old) item.cat = newVal; }); if(activeCatFilters.includes(old)) activeCatFilters[activeCatFilters.indexOf(old)] = newVal; addLog("Editou Categoria", `${old} -> ${newVal}`); renderCategories(); renderItems(); manualSaveSilent(); } }
+        function removeCategory(i) { if(confirm("Remover esta categoria inteira?")) { appData.categories.splice(i,1); renderCategories(); manualSaveSilent(); } }
+        function addSubcatPrompt(i) { const s=prompt("Subcategoria:"); if(s){appData.categories[i].subcats.push(s.trim()); addLog("Criou Sub", s.trim()); renderCategories(); manualSaveSilent();} }
+        function editSubcat(cIdx, sIdx) { const old = appData.categories[cIdx].subcats[sIdx]; const cN = appData.categories[cIdx].name; const n = prompt("Editar Subcategoria:", old); if(n && n.trim() && n.trim() !== old) { const newVal = n.trim(); appData.categories[cIdx].subcats[sIdx] = newVal; appData.items.forEach(item => { if(item.cat === cN && item.subcat === old) item.subcat = newVal; }); if(activeSubcatFilters.includes(old)) activeSubcatFilters[activeSubcatFilters.indexOf(old)] = newVal; addLog("Editou Sub", `${old} -> ${newVal}`); renderCategories(); renderItems(); manualSaveSilent(); } }
+        function removeSubcat(cIdx, sIdx) { if(confirm("Remover esta subcategoria?")) { appData.categories[cIdx].subcats.splice(sIdx, 1); renderCategories(); manualSaveSilent(); } }
+        function quickAddCategory() { const n = prompt("Nome da Nova Categoria:"); if(n && n.trim()) { const name = n.trim(); if(!appData.categories.find(c=>c.name===name)) { appData.categories.push({name: name, subcats: []}); renderCategories(); } document.getElementById('itemCat').value = name; updateSubcatOptions(); manualSaveSilent(); } }
+        function quickAddSubcat() { const cN = document.getElementById('itemCat').value; if(!cN) return alert("Selecione uma Categoria primeiro."); const n = prompt(`Nova Subcategoria para ${cN}:`); if(n && n.trim()) { const name = n.trim(); const cat = appData.categories.find(c=>c.name===cN); if(cat && !cat.subcats.includes(name)) { cat.subcats.push(name); renderCategories(); } document.getElementById('itemCat').value = cN; updateSubcatOptions(); document.getElementById('itemSubcat').value = name; manualSaveSilent(); } }
         function updateSubcatOptions() { const cn=document.getElementById('itemCat').value; const sc=document.getElementById('itemSubcat'); sc.innerHTML='<option value="">Nenhuma</option>'; const c=appData.categories.find(x=>x.name===cn); if(c) c.subcats.forEach(s=>sc.innerHTML+=`<option value="${s}">${s}</option>`); }
 
         // ================= TABELA DINÂMICA (DRAG & DROP) =================
         function updateVisibility() { colDefs.expiry.show = appData.settings.showExpiry; colDefs.establishment.show = appData.settings.showEstablishment; colDefs.price.show = appData.settings.showPrice; }
         function toggleExtraColumns() { ['expiry', 'establishment', 'price'].forEach(c => { const show = appData.settings[`show${c.charAt(0).toUpperCase() + c.slice(1)}`]; document.querySelectorAll(`.col-${c}`).forEach(el => { if(show) el.classList.remove('hidden'); else el.classList.add('hidden'); }); }); }
-        
-        function renderTableHeaders() {
-            updateVisibility(); const thead = document.getElementById('tableHead'); let tr = '<tr>';
-            appData.settings.colOrder.forEach(colKey => {
-                const def = colDefs[colKey];
-                if(def.show && (!isReadOnly || colKey !== 'actions')) {
-                    const sortHtml = def.sort ? ` <i class="fa-solid fa-sort ml-1"></i>` : ''; const cursor = def.sort ? 'cursor-pointer hover:text-primary transition' : ''; const onclick = def.sort ? `onclick="sortBy('${colKey}')"` : '';
-                    const drag = `draggable="true" ondragstart="handleDragStart(event, '${colKey}')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${colKey}')" class="p-3 ${cursor} draggable"`;
-                    tr += `<th ${drag} ${onclick}>${colKey === 'cat' ? '<span class="lbl-cat">Categoria</span> / Tags' : def.label}${sortHtml}</th>`;
-                }
-            });
-            tr += '</tr>'; thead.innerHTML = tr; updateTerminology();
-        }
-
+        function renderTableHeaders() { updateVisibility(); const thead = document.getElementById('tableHead'); let tr = '<tr>'; appData.settings.colOrder.forEach(colKey => { const def = colDefs[colKey]; if(def.show && (!isReadOnly || colKey !== 'actions')) { const sortHtml = def.sort ? ` <i class="fa-solid fa-sort ml-1"></i>` : ''; const cursor = def.sort ? 'cursor-pointer hover:text-primary transition' : ''; const onclick = def.sort ? `onclick="sortBy('${colKey}')"` : ''; const drag = `draggable="true" ondragstart="handleDragStart(event, '${colKey}')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${colKey}')" class="p-3 ${cursor} draggable"`; tr += `<th ${drag} ${onclick}>${colKey === 'cat' ? 'Categoria / Tags' : def.label}${sortHtml}</th>`; } }); tr += '</tr>'; thead.innerHTML = tr; }
         function handleDragStart(e, colKey) { draggedCol = colKey; e.dataTransfer.effectAllowed = 'move'; }
         function handleDragOver(e) { e.preventDefault(); e.target.closest('th').classList.add('over'); return false; }
         function handleDragLeave(e) { e.target.closest('th').classList.remove('over'); }
-        function handleDrop(e, targetCol) { e.stopPropagation(); e.target.closest('th').classList.remove('over'); if (draggedCol !== targetCol) { const srcIdx = appData.settings.colOrder.indexOf(draggedCol); const tgtIdx = appData.settings.colOrder.indexOf(targetCol); appData.settings.colOrder.splice(srcIdx, 1); appData.settings.colOrder.splice(tgtIdx, 0, draggedCol); saveData(false); renderTableHeaders(); renderItems(); } return false; }
-
-        function getStatusColor(q, r, o) { if(!q) return "text-gray-500"; const n=parseFloat(q.toString().replace(',','.')); if(isNaN(n)) return "text-gray-500"; if(n<=r) return "text-red-500 font-bold"; if(n<=o) return "text-orange-500 font-bold"; return "text-emerald-500 font-bold"; }
+        function handleDrop(e, targetCol) { e.stopPropagation(); e.target.closest('th').classList.remove('over'); if (draggedCol !== targetCol) { const srcIdx = appData.settings.colOrder.indexOf(draggedCol); const tgtIdx = appData.settings.colOrder.indexOf(targetCol); appData.settings.colOrder.splice(srcIdx, 1); appData.settings.colOrder.splice(tgtIdx, 0, draggedCol); manualSaveSilent(); renderTableHeaders(); renderItems(); } return false; }
 
         function renderItems() {
             updateVisibility(); toggleExtraColumns(); const s = document.getElementById('searchInput').value.toLowerCase(); const tb = document.getElementById('itemsTableBody'); tb.innerHTML = "";
@@ -484,21 +501,22 @@
                 const mTag = activeTagFilters.length===0 || (i.tags && i.tags.some(t=>activeTagFilters.includes(t)));
                 const mCat = activeCatFilters.length===0 || activeCatFilters.includes(i.cat);
                 const mSub = activeSubcatFilters.length===0 || activeSubcatFilters.includes(i.subcat);
-                return mt && mTag && mCat && mSub;
+                const mStat = activeStatusFilters.length===0 || activeStatusFilters.includes(getItemStatus(i));
+                return mt && mTag && mCat && mSub && mStat;
             });
             filtered.sort((a,b) => { let vA=a[sortCol]; let vB=b[sortCol]; if(typeof vA==='string') vA=vA.toLowerCase(); if(typeof vB==='string') vB=vB.toLowerCase(); if(vA<vB) return sortAsc?-1:1; if(vA>vB) return sortAsc?1:-1; return 0; });
-
             if(filtered.length===0) document.getElementById('emptyState').classList.replace('hidden','block');
             else {
                 document.getElementById('emptyState').classList.replace('block','hidden');
                 filtered.forEach(i => {
                     let tr = document.createElement('tr'); tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition group"; let colsHtml = '';
+                    const statColor = getItemStatus(i) === 'red' ? 'text-red-500 font-bold' : getItemStatus(i) === 'orange' ? 'text-orange-500 font-bold' : getItemStatus(i) === 'green' ? 'text-emerald-500 font-bold' : 'text-gray-500';
                     appData.settings.colOrder.forEach(colKey => {
                         const def = colDefs[colKey];
                         if(def.show && (!isReadOnly || colKey !== 'actions')) {
                             colsHtml += `<td class="p-3">`;
                             if(colKey === 'name') colsHtml += `<span class="font-medium">${i.name}</span>`;
-                            else if(colKey === 'qty') colsHtml += `<span class="${getStatusColor(i.qty, i.alertRed, i.alertOrange)}">${i.qty||'-'} <span class="text-[10px] text-gray-500 font-normal">${i.unit}</span></span>`;
+                            else if(colKey === 'qty') colsHtml += `<span class="${statColor}">${i.qty||'-'} <span class="text-[10px] text-gray-500 font-normal">${i.unit}</span></span>`;
                             else if(colKey === 'cat') colsHtml += `<span class="text-xs text-gray-500"><span class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">${i.cat||'-'}</span>${i.subcat?` <span class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">${i.subcat}</span>`:''}<div class="mt-1 flex flex-wrap gap-1">${(i.tags||[]).map(t=>`<span class="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-[9px] px-1 rounded">${t}</span>`).join('')}</div></span>`;
                             else if(colKey === 'expiry') colsHtml += i.expiry ? new Date(i.expiry).toLocaleDateString('pt-BR') : '-';
                             else if(colKey === 'establishment') colsHtml += i.establishment || '-';
@@ -506,106 +524,106 @@
                             else if(colKey === 'actions' && !isReadOnly) colsHtml += `<div class="text-right"><button onclick="editItem('${i.id}')" class="text-blue-500 p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded mr-2"><i class="fa-solid fa-pen"></i></button><button onclick="deleteItem('${i.id}')" class="text-red-500 p-1.5 bg-red-50 dark:bg-red-900/20 rounded"><i class="fa-solid fa-trash"></i></button></div>`;
                             colsHtml += `</td>`;
                         }
-                    });
-                    tr.innerHTML = colsHtml; tb.appendChild(tr);
+                    }); tr.innerHTML = colsHtml; tb.appendChild(tr);
                 });
             }
         }
         function sortBy(col) { sortCol=col; sortAsc=!sortAsc; renderItems(); }
 
-        // MANIPULAÇÃO DE ITENS (Com Tags atualizadas inline)
-        function renderItemTagsCheckbox(sel=[]) { 
-            const container = document.getElementById('itemTagsContainer');
-            let html = appData.tags.map(t=>`<label class="cursor-pointer"><input type="checkbox" value="${t}" class="item-tag-cb hidden tag-checkbox" ${sel.includes(t)?'checked':''}><span class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs rounded-lg border transition shadow-sm">${t}</span></label>`).join(''); 
-            html += `<button type="button" onclick="openModal('tagsModal')" class="ml-2 px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-[10px] rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm font-bold"><i class="fa-solid fa-pen"></i></button>`;
-            container.innerHTML = html;
-        }
-
-        function openItemModal() { 
-            updateVisibility(); toggleExtraColumns(); 
-            document.getElementById('itemModalTitle').innerText="Novo Item"; document.getElementById('itemId').value=""; document.getElementById('itemName').value=""; document.getElementById('itemQty').value=""; document.getElementById('itemAlertRed').value="1"; document.getElementById('itemAlertOrange').value="3"; document.getElementById('itemUnit').value="un"; document.getElementById('itemCat').value=""; updateSubcatOptions(); renderItemTagsCheckbox(); document.getElementById('itemExpiry').value=""; document.getElementById('itemEstablishment').value=""; document.getElementById('itemPrice').value=""; openModal('itemModal'); 
-        }
-        
+        // ================= MANIPULAÇÃO DE ITENS =================
+        function renderItemTagsCheckbox(sel=[]) { const container = document.getElementById('itemTagsContainer'); let html = appData.tags.map(t=>`<label class="cursor-pointer"><input type="checkbox" value="${t}" class="item-tag-cb hidden tag-checkbox" ${sel.includes(t)?'checked':''}><span class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs rounded-lg border transition shadow-sm">${t}</span></label>`).join(''); html += `<button type="button" onclick="openModal('tagsModal')" class="ml-2 px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-[10px] rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm font-bold"><i class="fa-solid fa-pen"></i></button>`; container.innerHTML = html; }
+        function openItemModal() { updateVisibility(); toggleExtraColumns(); document.getElementById('itemModalTitle').innerText="Novo Item"; document.getElementById('itemId').value=""; document.getElementById('itemName').value=""; document.getElementById('itemQty').value=""; document.getElementById('itemAlertRed').value="1"; document.getElementById('itemAlertOrange').value="3"; document.getElementById('itemUnit').value="un"; document.getElementById('itemCat').value=""; updateSubcatOptions(); renderItemTagsCheckbox(); document.getElementById('itemExpiry').value=""; document.getElementById('itemEstablishment').value=""; document.getElementById('itemPrice').value=""; openModal('itemModal'); }
         function saveItem() {
             const n=document.getElementById('itemName').value.trim(); if(!n) return alert("O nome é obrigatório!");
             const selTags=Array.from(document.querySelectorAll('.item-tag-cb:checked')).map(c=>c.value);
-            const item = {
-                id: document.getElementById('itemId').value || Date.now().toString(), name: n,
-                qty: document.getElementById('itemQty').value.trim(), alertRed: parseFloat(document.getElementById('itemAlertRed').value)||0, alertOrange: parseFloat(document.getElementById('itemAlertOrange').value)||0,
-                unit: document.getElementById('itemUnit').value, cat: document.getElementById('itemCat').value, subcat: document.getElementById('itemSubcat').value, tags: selTags,
-                expiry: document.getElementById('itemExpiry').value, establishment: document.getElementById('itemEstablishment').value.trim(), price: parseFloat(document.getElementById('itemPrice').value)||0,
-                lastUpdate: new Date().toISOString()
-            };
-            
+            const item = { id: document.getElementById('itemId').value || Date.now().toString(), name: n, qty: document.getElementById('itemQty').value.trim(), alertRed: parseFloat(document.getElementById('itemAlertRed').value)||0, alertOrange: parseFloat(document.getElementById('itemAlertOrange').value)||0, unit: document.getElementById('itemUnit').value, cat: document.getElementById('itemCat').value, subcat: document.getElementById('itemSubcat').value, tags: selTags, expiry: document.getElementById('itemExpiry').value, establishment: document.getElementById('itemEstablishment').value.trim(), price: parseFloat(document.getElementById('itemPrice').value)||0, lastUpdate: new Date().toISOString() };
             const idx=appData.items.findIndex(x=>x.id===item.id); 
-            if(idx===-1) {
-                appData.items.push(item); addLog("Add Item", `${item.name} (${item.qty||0} ${item.unit})`);
-            } else {
-                const old = appData.items[idx]; let chg = [];
-                if(old.qty != item.qty) chg.push(`Qtd: ${old.qty||0} ➔ ${item.qty||0}`);
-                if(old.name != item.name) chg.push(`Nome ➔ ${item.name}`);
-                if(old.cat != item.cat) chg.push(`Cat: ${old.cat||'-'} ➔ ${item.cat||'-'}`);
-                if(old.price != item.price) chg.push(`R$ ${old.price||0} ➔ ${item.price||0}`);
-                appData.items[idx] = item;
-                addLog("Editou", `${item.name} ${chg.length>0 ? `(${chg.join(', ')})` : ''}`);
-            }
-
+            if(idx===-1) { appData.items.push(item); addLog("Add Item", `${item.name} (${item.qty||0} ${item.unit})`); } 
+            else { const old = appData.items[idx]; let chg = []; if(old.qty != item.qty) chg.push(`Qtd: ${old.qty||0} ➔ ${item.qty||0}`); if(old.name != item.name) chg.push(`Nome ➔ ${item.name}`); if(old.cat != item.cat) chg.push(`Cat: ${old.cat||'-'} ➔ ${item.cat||'-'}`); if(old.price != item.price) chg.push(`R$ ${old.price||0} ➔ ${item.price||0}`); appData.items[idx] = item; addLog("Editou", `${item.name} ${chg.length>0 ? `(${chg.join(', ')})` : ''}`); }
             if(!appData.compendium.includes(n)){appData.compendium.push(n); renderCompendium();}
-            closeModal('itemModal'); renderItems(); saveData();
+            closeModal('itemModal'); renderItems(); manualSaveSilent();
         }
-        
-        function editItem(id) { 
-            const i=appData.items.find(x=>x.id===id); 
-            if(i){ 
-                updateVisibility(); toggleExtraColumns(); 
-                document.getElementById('itemModalTitle').innerText="Editar Item"; document.getElementById('itemId').value=i.id; document.getElementById('itemName').value=i.name; document.getElementById('itemQty').value=i.qty||""; document.getElementById('itemAlertRed').value=i.alertRed??1; document.getElementById('itemAlertOrange').value=i.alertOrange??3; document.getElementById('itemUnit').value=i.unit; document.getElementById('itemCat').value=i.cat; updateSubcatOptions(); document.getElementById('itemSubcat').value=i.subcat||""; renderItemTagsCheckbox(i.tags||[]); document.getElementById('itemExpiry').value=i.expiry||""; document.getElementById('itemEstablishment').value=i.establishment||""; document.getElementById('itemPrice').value=i.price||""; openModal('itemModal'); 
-            } 
-        }
-        function deleteItem(id) { if(confirm("Deletar permanentemente?")){ const i=appData.items.findIndex(x=>x.id===id); const n = appData.items[i].name; appData.items.splice(i,1); addLog("Deletou", n); renderItems(); saveData(); } }
+        function editItem(id) { const i=appData.items.find(x=>x.id===id); if(i){ updateVisibility(); toggleExtraColumns(); document.getElementById('itemModalTitle').innerText="Editar Item"; document.getElementById('itemId').value=i.id; document.getElementById('itemName').value=i.name; document.getElementById('itemQty').value=i.qty||""; document.getElementById('itemAlertRed').value=i.alertRed??1; document.getElementById('itemAlertOrange').value=i.alertOrange??3; document.getElementById('itemUnit').value=i.unit; document.getElementById('itemCat').value=i.cat; updateSubcatOptions(); document.getElementById('itemSubcat').value=i.subcat||""; renderItemTagsCheckbox(i.tags||[]); document.getElementById('itemExpiry').value=i.expiry||""; document.getElementById('itemEstablishment').value=i.establishment||""; document.getElementById('itemPrice').value=i.price||""; openModal('itemModal'); } }
+        function deleteItem(id) { if(confirm("Deletar permanentemente?")){ const i=appData.items.findIndex(x=>x.id===id); const n = appData.items[i].name; appData.items.splice(i,1); addLog("Deletou", n); renderItems(); manualSaveSilent(); } }
 
-        // ================= LISTA DE COMPRAS COM/SEM QTD =================
-        function openShoppingList() {
-            const c=document.getElementById('shoppingListContainer'); c.innerHTML=""; document.getElementById('shoppingTextOutput').classList.add('hidden');
-            const sorted=[...appData.items].sort((a,b)=>(a.cat||"").localeCompare(b.cat||"")); let lastCat=null;
-            sorted.forEach(i => {
-                let nQ=parseFloat((i.qty||"").toString().replace(',','.')); let isAl=!isNaN(nQ) && nQ<=i.alertOrange;
-                if(i.cat!==lastCat){ c.innerHTML+=`<div class="font-bold text-xs bg-gray-100 dark:bg-gray-800 p-1 mt-2 rounded">${i.cat||'Sem Categoria'}</div>`; lastCat=i.cat; }
-                c.innerHTML+=`<label class="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer rounded border-b dark:border-gray-700 text-sm"><input type="checkbox" value="${i.id}" class="shopping-cb w-4 h-4 text-orange-500 rounded" ${isAl?'checked':''}><span class="flex-grow font-medium">${i.name}</span><span class="text-xs text-gray-400">Tem: ${i.qty||'-'}</span></label>`;
+        // ================= LISTA DE COMPRAS 2.0 =================
+        function openShoppingList() { renderShoppingList(); openModal('shoppingListModal'); }
+        function renderShoppingList() {
+            renderShoppingFilters(); const c=document.getElementById('shoppingListContainer'); c.innerHTML=""; document.getElementById('shoppingTextOutput').classList.add('hidden'); const searchShop = document.getElementById('shoppingSearch').value.toLowerCase();
+            const filteredShop = appData.items.filter(i => {
+                const mt = i.name.toLowerCase().includes(searchShop) || (i.establishment||'').toLowerCase().includes(searchShop);
+                const mTag = shopActiveTags.length===0 || (i.tags && i.tags.some(t=>shopActiveTags.includes(t))); const mCat = shopActiveCats.length===0 || shopActiveCats.includes(i.cat); const mSub = shopActiveSubcats.length===0 || shopActiveSubcats.includes(i.subcat); const mStat = shopActiveStatus.length===0 || shopActiveStatus.includes(getItemStatus(i));
+                return mt && mTag && mCat && mSub && mStat;
             });
-            openModal('shoppingListModal');
+            filteredShop.sort((a,b)=>(a.cat||"").localeCompare(b.cat||"")); let lastCat=null;
+            filteredShop.forEach(i => {
+                const stat = getItemStatus(i); const isAl = (stat === 'red' || stat === 'orange');
+                if(i.cat!==lastCat){ c.innerHTML+=`<div class="font-bold text-xs bg-gray-200 dark:bg-gray-800 p-1 mt-2 rounded border border-gray-300 dark:border-gray-700">${i.cat||'Sem Categoria'}</div>`; lastCat=i.cat; }
+                const estText = i.establishment ? `<span class="text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 px-1 rounded ml-2">${i.establishment}</span>` : '';
+                c.innerHTML+=`<label class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer rounded border-b border-dashed dark:border-gray-700 text-sm"><input type="checkbox" value="${i.id}" class="shopping-cb w-4 h-4 text-orange-500 rounded" ${isAl?'checked':''}><span class="flex-grow font-medium">${i.name} ${estText}</span><span class="text-xs text-gray-500 font-bold">Tem: ${i.qty||'-'}</span></label>`;
+            });
         }
-        function getShoppingText() {
-            const checkedIds = Array.from(document.querySelectorAll('.shopping-cb:checked')).map(cb=>cb.value);
-            if(checkedIds.length===0) return "Lista vazia.";
-            const showQtd = document.getElementById('chkShowQtdInList').checked;
-            let txt = "*COMPRAS - EMOHOUSE:*\n\n";
-            checkedIds.forEach(id => { const it = appData.items.find(x=>x.id===id); if(it) txt += `[ ] ${it.name} ${showQtd ? `(Tem: ${it.qty||0})` : ''}\n`; });
-            return txt;
-        }
-        function copyShoppingList() { 
-            const txt = getShoppingText(); const out = document.getElementById('shoppingTextOutput'); out.value = txt; out.classList.remove('hidden');
-            out.select(); out.setSelectionRange(0, 99999);
-            try { document.execCommand('copy'); alert("Copiado com sucesso!"); } catch(e) { alert("Erro ao copiar. Selecione o texto e copie manualmente."); }
-        }
+        function getShoppingText() { const checkedIds = Array.from(document.querySelectorAll('.shopping-cb:checked')).map(cb=>cb.value); if(checkedIds.length===0) return "Lista vazia."; const showQtd = document.getElementById('chkShowQtdInList').checked; let txt = "*COMPRAS - EMOHOUSE:*\n\n"; checkedIds.forEach(id => { const it = appData.items.find(x=>x.id===id); if(it) txt += `[ ] ${it.name} ${showQtd ? `(Tem: ${it.qty||0})` : ''}\n`; }); return txt; }
+        function copyShoppingList() { const txt = getShoppingText(); const out = document.getElementById('shoppingTextOutput'); out.value = txt; out.classList.remove('hidden'); out.select(); out.setSelectionRange(0, 99999); try { document.execCommand('copy'); alert("Copiado com sucesso!"); } catch(e) { alert("Erro ao copiar. Selecione o texto e copie manualmente."); } }
         function shareWhatsApp() { window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(getShoppingText())}`, '_blank'); }
 
-        // ================= CONFIGS E CSV IMPORT/EXPORT =================
-        function applySettingsUI() {
-            document.getElementById('setUseFolders').checked=appData.settings.useFolders; document.getElementById('setExpiry').checked=appData.settings.showExpiry; document.getElementById('setEstablishment').checked=appData.settings.showEstablishment; document.getElementById('setPrice').checked=appData.settings.showPrice;
-            document.getElementById('setEnableQuickFilters').checked=appData.settings.enableQuickFilters; document.getElementById('setEnableCatFilters').checked=appData.settings.enableCatFilters;
-            document.getElementById('ghToken').value=appData.settings.ghToken; document.getElementById('ghRepo').value=appData.settings.ghRepo; document.getElementById('ghPath').value=appData.settings.ghPath; updateTerminology(); toggleExtraColumns();
-        }
-        function updateSettings() {
-            appData.settings.useFolders=document.getElementById('setUseFolders').checked; appData.settings.showExpiry=document.getElementById('setExpiry').checked; appData.settings.showEstablishment=document.getElementById('setEstablishment').checked; appData.settings.showPrice=document.getElementById('setPrice').checked;
-            appData.settings.enableQuickFilters=document.getElementById('setEnableQuickFilters').checked; appData.settings.enableCatFilters=document.getElementById('setEnableCatFilters').checked;
-            updateTerminology(); renderTableHeaders(); renderQuickFilters(); renderItems(); saveData(false);
-        }
-        function updateTerminology() { const t=appData.settings.useFolders?"Pasta":"Categoria"; const s=appData.settings.useFolders?"Subpasta":"Subcategoria"; document.querySelectorAll('.lbl-cat').forEach(e=>e.innerText=t); document.querySelectorAll('.lbl-subcat').forEach(e=>e.innerText=s); }
+        // ================= CONFIGS E RELATÓRIOS SIMPLES =================
+        function applySettingsUI() { document.getElementById('setExpiry').checked=appData.settings.showExpiry; document.getElementById('setEstablishment').checked=appData.settings.showEstablishment; document.getElementById('setPrice').checked=appData.settings.showPrice; document.getElementById('setEnableQuickFilters').checked=appData.settings.enableQuickFilters; document.getElementById('setEnableCatFilters').checked=appData.settings.enableCatFilters; toggleExtraColumns(); }
+        function updateSettings() { appData.settings.showExpiry=document.getElementById('setExpiry').checked; appData.settings.showEstablishment=document.getElementById('setEstablishment').checked; appData.settings.showPrice=document.getElementById('setPrice').checked; appData.settings.enableQuickFilters=document.getElementById('setEnableQuickFilters').checked; appData.settings.enableCatFilters=document.getElementById('setEnableCatFilters').checked; renderTableHeaders(); renderQuickFilters(); renderItems(); manualSaveSilent(); }
         function renderLogs() { document.getElementById('logsContainer').innerHTML = (appData.logs||[]).map(l=>`<div class="border-b dark:border-gray-700 pb-2 text-sm"><div class="text-[10px] text-gray-500">${l.date} - <b class="text-gray-800 dark:text-gray-300">${l.user}</b></div><div><span class="font-semibold text-primary">${l.action}:</span> ${l.details}</div></div>`).join(''); }
+        function exportReport(format) {
+            if(format==='csv') triggerDownload(new Blob(["Nome,Quantidade,Unidade,Categoria,Estabelecimento,Preco\n" + appData.items.map(i=>`${i.name},${i.qty||''},${i.unit||''},${i.cat||''},${i.establishment||''},${i.price||0}`).join('\n')], {type:"text/csv;charset=utf-8;"}), `Relatorio_EMOHOUSE_${getFormattedDateString()}.csv`);
+            else if(format==='pdf') { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text("Estoque EMOHOUSE", 14, 15); doc.autoTable({head:[['Item','Qtd','Cat']], body:appData.items.map(i=>[i.name, `${i.qty||0} ${i.unit}`, i.cat||''])}); doc.save(`PDF_EMOHOUSE_${getFormattedDateString()}.pdf`); }
+            addLog("Exportação", `Relatório em ${format.toUpperCase()}`); closeModal('reportModal');
+        }
 
-        function handleCSVUpload(e) {
-            const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader();
+        // ================= SISTEMA DE IMPORTAR / EXPORTAR JSON =================
+        function getFormattedDateString() { const d = new Date(); const p = n => n.toString().padStart(2, '0'); return `${p(d.getDate())}_${p(d.getMonth()+1)}_${d.getFullYear()}_${p(d.getHours())}_${p(d.getMinutes())}_${p(d.getSeconds())}`; }
+        async function exportJSONInteractive(silentSave = false) {
+            if(!silentSave) { if(confirm("Deseja salvar as alterações mais recentes antes de exportar para garantir 100% de atualização?")) manualSaveSilent(); }
+            setTimeout(async () => {
+                const filename = `Backup_Estoque_EMOHOUSE_${getFormattedDateString()}.json`; const blob = new Blob([JSON.stringify(appData, null, 2)], {type:"application/json"});
+                triggerDownload(blob, filename); addLog("Backup", `Arquivo JSON exportado.`);
+                setTimeout(async () => {
+                    if(confirm("O backup JSON foi baixado!\n\nDeseja compartilhar esse arquivo com outra pessoa agora mesmo? (WhatsApp, Drive, etc)")) {
+                        try { const file = new File([blob], filename, { type: "application/json" }); if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Backup Estoque EMOHOUSE', text: 'Aqui está o arquivo atualizado do estoque!' }); } else { alert("Atenção: Seu aparelho não suporta o menu de compartilhamento automático por aqui. Procure o arquivo na sua pasta de Downloads e envie manualmente."); } } catch(e) {}
+                    }
+                    closeModal('importExportModal');
+                }, 1000);
+            }, 500);
+        }
+        function handleJSONUpload(e) {
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const imp = JSON.parse(evt.target.result);
+                    if(imp && typeof imp === 'object') {
+                        appData.items = imp.items || []; appData.categories = imp.categories || [{ name: "Alimentos", subcats: [] }]; appData.tags = imp.tags || []; appData.compendium = imp.compendium || []; appData.logs = imp.logs || []; appData.settings = { ...appData.settings, ...(imp.settings || {}) }; appData.lastUpdated = imp.lastUpdated || new Date().toISOString();
+                        saveData(); sessionStorage.setItem('skipStartupModal', 'true'); alert("Base de dados atualizada com sucesso!"); location.reload();
+                    } else { alert("Arquivo JSON inválido."); }
+                } catch(err) { alert("Erro ao ler o arquivo. Certifique-se de que é o backup do EMOHOUSE."); }
+            }; reader.readAsText(file); e.target.value = '';
+        }
+
+        // ================= ADMINISTRAÇÃO LOTE (CSV EXCEL COMPLETO) =================
+        function exportBatchCSV() { triggerDownload(new Blob(["Nome,Quantidade,Unidade,Categoria,Subcategoria,AlertaVermelho,AlertaLaranja,Validade,Estabelecimento,Preco,Tags\n" + appData.items.map(i=>`${i.name},${i.qty||''},${i.unit||''},${i.cat||''},${i.subcat||''},${i.alertRed||1},${i.alertOrange||3},${i.expiry||''},${i.establishment||''},${i.price||0},${(i.tags||[]).join(';')}`).join('\n')], {type:"text/csv;charset=utf-8;"}), `BaseLote_EMOHOUSE_${getFormattedDateString()}.csv`); closeModal('batchCsvModal'); }
+        
+        function clearDatabase() {
+            if(confirm("⚠️ AVISO CRÍTICO!\nIsso apagará TODOS os itens da sua base de dados atual.\nTem certeza que deseja continuar?")) {
+                if(prompt("Digite 'ZERAR' (em maiúsculo) para confirmar:") === 'ZERAR') {
+                    appData.items = []; addLog("Admin", "Zerou a base de dados de itens."); manualSaveSilent(); renderItems(); alert("Base de dados zerada com sucesso!");
+                } else { alert("Ação cancelada."); }
+            }
+        }
+        
+        function promptCsvUpload() {
+            if(confirm("ATENÇÃO: Você já zerou a base de dados (se necessário) para evitar que os itens sejam duplicados ao importar?\n\nClique em OK para continuar e selecionar o arquivo.")) {
+                document.getElementById('csvUpload').click();
+            }
+        }
+
+        function handleBatchCSVUpload(e) {
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
             reader.onload = function(evt) {
                 const text = evt.target.result; const lines = text.split(/\r?\n/);
                 if(lines.length < 2) return alert("Arquivo CSV vazio ou formato incorreto.");
@@ -613,64 +631,19 @@
                 lines.forEach(line => {
                     const parts = line.split(',');
                     if(parts.length >= 1 && parts[0].trim()) {
-                        const name = parts[0].trim(); const cat = (parts[3]||"").trim(); const sub = (parts[4]||"").trim();
-                        const tagsRaw = (parts[10]||"").trim(); const itemTags = tagsRaw ? tagsRaw.split(';').map(t=>t.trim()) : [];
+                        const name = parts[0].trim(); const cat = (parts[3]||"").trim(); const sub = (parts[4]||"").trim(); const tagsRaw = (parts[10]||"").trim(); const itemTags = tagsRaw ? tagsRaw.split(';').map(t=>t.trim()) : [];
                         appData.items.push({ id: Date.now().toString() + Math.random(), name: name, qty: (parts[1]||"").trim(), unit: (parts[2]||"un").trim(), cat: cat, subcat: sub, alertRed: parseFloat(parts[5])||1, alertOrange: parseFloat(parts[6])||3, expiry: (parts[7]||"").trim(), establishment: (parts[8]||"").trim(), price: parseFloat(parts[9])||0, tags: itemTags });
                         if(!appData.compendium.includes(name)) appData.compendium.push(name);
-                        if(cat && !appData.categories.find(c=>c.name===cat)) appData.categories.push({name:cat, subcats:sub?[sub]:[]});
-                        else if(cat && sub){ const cx=appData.categories.find(c=>c.name===cat); if(!cx.subcats.includes(sub)) cx.subcats.push(sub); }
+                        if(cat && !appData.categories.find(c=>c.name===cat)) appData.categories.push({name:cat, subcats:sub?[sub]:[]}); else if(cat && sub){ const cx=appData.categories.find(c=>c.name===cat); if(!cx.subcats.includes(sub)) cx.subcats.push(sub); }
                         itemTags.forEach(tg => { if(!appData.tags.includes(tg)) appData.tags.push(tg); }); count++;
                     }
                 });
-                alert(`${count} itens importados!`);
-                addLog("Importação CSV", `${count} itens carregados.`);
-                renderCategories(); renderTagsList(); renderCompendium(); renderItems(); saveData(); closeModal('exportModal');
-            };
-            reader.readAsText(file); e.target.value = '';
+                alert(`${count} itens injetados via lote CSV!`); addLog("Admin Lote CSV", `${count} itens injetados na base.`);
+                renderCategories(); renderTagsList(); renderCompendium(); renderItems(); manualSaveSilent(); closeModal('batchCsvModal');
+            }; reader.readAsText(file); e.target.value = '';
         }
 
-        function exportData(format) {
-            if(format==='json') triggerDownload(new Blob([JSON.stringify(appData,null,2)], {type:"application/json"}), "estoque_emohouse.json");
-            else if(format==='csv') triggerDownload(new Blob(["Nome,Quantidade,Unidade,Categoria,Subcategoria,AlertaVermelho,AlertaLaranja,Validade,Local,Preco,Tags\n" + appData.items.map(i=>`${i.name},${i.qty||''},${i.unit||''},${i.cat||''},${i.subcat||''},${i.alertRed||1},${i.alertOrange||3},${i.expiry||''},${i.establishment||''},${i.price||0},${(i.tags||[]).join(';')}`).join('\n')], {type:"text/csv;charset=utf-8;"}), "estoque_emohouse.csv");
-            else if(format==='txt') triggerDownload(new Blob(["=== ESTOQUE EMOHOUSE ===\n\n" + appData.items.map(i=>`- ${i.name}: ${i.qty||0} ${i.unit}`).join('\n')], {type:"text/plain;charset=utf-8;"}), "estoque_emohouse.txt");
-            else if(format==='pdf') { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text("Estoque EMOHOUSE", 14, 15); doc.autoTable({head:[['Item','Qtd','Cat']], body:appData.items.map(i=>[i.name, i.qty||0, i.cat||''])}); doc.save("estoque_emohouse.pdf"); }
-            addLog("Exportação", `Dados exportados em ${format.toUpperCase()}`);
-            closeModal('exportModal');
-        }
         function triggerDownload(b, f) { const l=document.createElement("a"); l.href=URL.createObjectURL(b); l.download=f; l.click(); }
-
-        // ================= GITHUB SYNC =================
-        function saveGithubSettings() {
-            appData.settings.ghToken=document.getElementById('ghToken').value.trim(); appData.settings.ghRepo=document.getElementById('ghRepo').value.trim(); appData.settings.ghPath=document.getElementById('ghPath').value.trim();
-            saveData(false); alert("Salvo! Sincronizando..."); syncFromGithub();
-        }
-        async function syncToGithub() { await syncPushGithub(); alert("Sincronizado na Nuvem!"); }
-        async function syncFromGithub() {
-            if(!appData.settings.ghToken) return;
-            try {
-                document.getElementById('syncBtn').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
-                const res=await fetch(`https://api.github.com/repos/${appData.settings.ghRepo}/contents/${appData.settings.ghPath}`, {headers:{'Authorization':`Bearer ${appData.settings.ghToken}`}});
-                if(res.ok) {
-                    const data=await res.json(); appData.settings.ghSha=data.sha;
-                    const cloudData=JSON.parse(decodeURIComponent(escape(atob(data.content))));
-                    const locSet=appData.settings; appData=cloudData; appData.settings=locSet;
-                    if(!appData.tags) appData.tags=[]; if(!appData.compendium) appData.compendium=[]; if(!appData.logs) appData.logs=[];
-                    localStorage.setItem("inv_data", JSON.stringify(appData));
-                    renderItems(); renderCategories(); renderTagsList(); renderCompendium();
-                } else if(res.status===404) await syncPushGithub();
-            } catch(e) {} finally { document.getElementById('syncBtn').innerHTML='<i class="fa-solid fa-cloud-arrow-up"></i>'; }
-        }
-        async function syncPushGithub() {
-            if(!appData.settings.ghToken) return;
-            try {
-                const dataToUp=JSON.parse(JSON.stringify(appData));
-                dataToUp.settings={useFolders:appData.settings.useFolders, showExpiry:appData.settings.showExpiry, showEstablishment:appData.settings.showEstablishment, showPrice:appData.settings.showPrice, enableQuickFilters:appData.settings.enableQuickFilters, enableCatFilters:appData.settings.enableCatFilters, colOrder:appData.settings.colOrder}; 
-                const contentB64=btoa(unescape(encodeURIComponent(JSON.stringify(dataToUp,null,2))));
-                const body={message:`Sync por ${currentUser}`, content:contentB64}; if(appData.settings.ghSha) body.sha=appData.settings.ghSha;
-                const res=await fetch(`https://api.github.com/repos/${appData.settings.ghRepo}/contents/${appData.settings.ghPath}`, {method:'PUT', headers:{'Authorization':`Bearer ${appData.settings.ghToken}`}, body:JSON.stringify(body)});
-                if(res.ok) { const data=await res.json(); appData.settings.ghSha=data.content.sha; localStorage.setItem("inv_data", JSON.stringify(appData)); }
-            } catch(e) {}
-        }
     </script>
 </body>
 </html>
